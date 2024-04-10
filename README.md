@@ -1,9 +1,5 @@
-# 🎓 Course-Q-A-Platform 🎓
+# Designing and Building Scalable Web Applications / Course Project II Template
 
-This is the final project for the course, "Designing and Building Scalable Web Applications". 
+Provides an endpoint for a large language model (a small model with poor quality responses included), an API endpoint starter for the QA platform, and an UI starter for the QA platform.
 
-## 🚀 Project Overview 🚀
-
-This platform is designed to facilitate Q&A interactions related to various courses. It's a one-stop solution for students and educators to engage in productive discussions and knowledge sharing.
-
-Stay tuned for more updates!
+Starting the application up for the first time may take a while, as it also downloads the (small) large language model (approx. 250 megabytes) and packages it into an image.
