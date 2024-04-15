@@ -14,7 +14,7 @@ export async function getllm(request) {
   return response;
 }
 
-export async function getCourses(request) {
+export async function getCourses() {
   try {
     const courses = await sql`SELECT * FROM Courses;`;
     return new Response(JSON.stringify(courses), {
@@ -24,6 +24,20 @@ export async function getCourses(request) {
   } catch (error) {
     console.error("Error fetching courses:", error);
     const body = "Error fetching courses";
+    return new Response(JSON.stringify(body), { status: 500 });
+  }
+}
+export async function getCourse(request) {
+  try {
+    const courseId = new URL(request.url).searchParams.get("courseId");
+    const course = await sql`SELECT * FROM Courses WHERE id = ${courseId};`;
+    return new Response(JSON.stringify(course), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    const body = "Error fetching course";
     return new Response(JSON.stringify(body), { status: 500 });
   }
 }

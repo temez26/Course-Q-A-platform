@@ -8,6 +8,7 @@ import {
   generateAnswer,
   getboi,
   getllm,
+  getCourse,
 } from "./endpoints.js";
 
 export const urlMapping = [
@@ -27,9 +28,9 @@ export const urlMapping = [
     fn: getCourses,
   },
   {
-    method: "POST",
+    method: "GET",
     pattern: new URLPattern({ pathname: "/getCourse" }),
-    fn: getCourses,
+    fn: getCourse,
   },
 
   {
