@@ -19,7 +19,6 @@
     if (response.ok) {
       const course = await response.json();
       console.log(course);
-      return course;
     } else {
       throw new Error("Error fetching course");
     }
