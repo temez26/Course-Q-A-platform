@@ -1,15 +1,53 @@
-import { Router } from "./deps.js";
-import { getCourses, postQuestion, postAnswer, postUpvote, getQuestions, getAnswers, generateAnswer } from "./endpoints.js";
+import {
+  getCourses,
+  postQuestion,
+  postAnswer,
+  postUpvote,
+  getQuestions,
+  getAnswers,
+  generateAnswer,
+  getboi,
+} from "./endpoints.js";
 
-const router = new Router();
-
-router
-  .get('/api/courses', getCourses)
-  .post('/api/questions', postQuestion)
-  .post('/api/answers', postAnswer)
-  .post('/api/upvotes', postUpvote)
-  .get('/api/questions', getQuestions)
-  .get('/api/answers', getAnswers)
-  .post('/api/generate-answer', generateAnswer);
-
-export default router;
+export const urlMapping = [
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/boi" }),
+    fn: getboi,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/getCourses" }),
+    fn: getCourses,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/postQuestion" }),
+    fn: postQuestion,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/postAnswer" }),
+    fn: postAnswer,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/postUpvote" }),
+    fn: postUpvote,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/getQuestions" }),
+    fn: getQuestions,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/getAnswers" }),
+    fn: getAnswers,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/generateAnswer" }),
+    fn: generateAnswer,
+  },
+];
