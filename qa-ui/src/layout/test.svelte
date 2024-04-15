@@ -13,7 +13,7 @@
 
 <main>
   <h1>{message}</h1>
-  <button on:click={() => callApi("/api/")}>Get Random llm</button>
+
   <button on:click={() => callApi("/api/boi")}>Get Boi</button>
   <button on:click={() => callApi("/api/getCourses")}>Get Courses</button>
   <button on:click={() => callApi("/api/postQuestion", "POST")}
