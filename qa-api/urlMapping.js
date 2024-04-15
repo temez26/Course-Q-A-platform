@@ -28,6 +28,12 @@ export const urlMapping = [
   },
   {
     method: "POST",
+    pattern: new URLPattern({ pathname: "/getCourse" }),
+    fn: getCourses,
+  },
+
+  {
+    method: "POST",
     pattern: new URLPattern({ pathname: "/postQuestion" }),
     fn: postQuestion,
   },

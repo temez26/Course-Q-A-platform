@@ -1,4 +1,4 @@
-// endpoints.js
+import { sql } from "./database.js";
 
 export async function getllm(request) {
   const data = await request.json();
@@ -14,64 +14,63 @@ export async function getllm(request) {
   return response;
 }
 
-export async function getCourses(context) {
-  console.log("getCourses called");
-  // Fetch and return the list of courses
-  return new Response("Courses fetched", {
-    headers: new Headers({ "content-type": "text/plain" }),
-  });
+export async function getCourses(request) {
+  try {
+    const courses = await sql`SELECT * FROM Courses;`;
+    return new Response(JSON.stringify(courses), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    const body = "Error fetching courses";
+    return new Response(JSON.stringify(body), { status: 500 });
+  }
 }
 
-export async function postQuestion(context) {
-  console.log("postQuestion called");
+export async function postQuestion() {
   // Handle question submission
   return new Response("Question posted", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function postAnswer(context) {
-  console.log("postAnswer called");
+export async function postAnswer() {
   // Handle answer submission
   return new Response("Answer posted", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function postUpvote(context) {
-  console.log("postUpvote called");
+export async function postUpvote() {
   // Handle upvotes
   return new Response("Upvote posted", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function getQuestions(context) {
-  console.log("getQuestions called");
+export async function getQuestions() {
   // Fetch and return the list of questions for a given course
   return new Response("Questions fetched", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function getAnswers(context) {
-  console.log("getAnswers called");
+export async function getAnswers() {
   // Fetch and return the list of answers for a given question
   return new Response("Answers fetched", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function generateAnswer(context) {
-  console.log("generateAnswer called");
+export async function generateAnswer() {
   // Generate an answer using a large language model
   return new Response("Answer generated", {
     headers: new Headers({ "content-type": "text/plain" }),
   });
 }
 
-export async function getboi(context) {
-  console.log("getboi called");
+export async function getboi() {
   return new Response("Hello world", {
     headers: new Headers({ "content-type": "text/plain" }),
   });

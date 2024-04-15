@@ -1,5 +1,6 @@
 import { serve } from "./deps.js";
 import { urlMapping } from "./urlMapping.js";
+
 const handleRequest = async (request) => {
   try {
     const mapping = urlMapping.find(

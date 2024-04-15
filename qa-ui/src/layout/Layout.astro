@@ -1,6 +1,7 @@
 ---
 import Header from "./Header.svelte";
-import Test from "./test.svelte";
+
+import Courses from "../components/Courses.svelte";
 ---
 
 <html lang="en">
@@ -16,7 +17,8 @@ import Test from "./test.svelte";
 
     <div class="container mx-auto">
       <slot />
-      <Test client:only />
+
+      <Courses client:only={"svelte"} />
     </div>
   </body>
 </html>
