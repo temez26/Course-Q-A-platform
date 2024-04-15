@@ -1,12 +1,12 @@
 <script>
   import { userUuid } from "../stores/stores.js";
-  
+
   const askSomething = async () => {
     const data = {
       user: $userUuid,
       question: "???",
     };
-    
+
     const response = await fetch("/api/", {
       method: "POST",
       headers: {
