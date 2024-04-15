@@ -1,6 +1,5 @@
 ---
 import Header from "./Header.svelte";
-import Courses from "../components/Courses.svelte";
 ---
 
 <html lang="en">
@@ -15,7 +14,13 @@ import Courses from "../components/Courses.svelte";
     <Header client:only={"svelte"} />
 
     <div class="container mx-auto">
-      <Courses client:only={"svelte"} />
+      ¨
+      <ul>
+        <li><a href="/">Home page</a></li>
+        <li><a href="/courses">Courses</a></li>
+        <li><a href="/course">Course</a></li>
+      </ul>
+      <slot />
     </div>
   </body>
 </html>
