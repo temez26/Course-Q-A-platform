@@ -7,9 +7,15 @@ import {
   getAnswers,
   generateAnswer,
   getboi,
+  getllm,
 } from "./endpoints.js";
 
 export const urlMapping = [
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/" }),
+    fn: getllm,
+  },
   {
     method: "GET",
     pattern: new URLPattern({ pathname: "/boi" }),
