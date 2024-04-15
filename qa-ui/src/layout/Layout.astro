@@ -1,5 +1,6 @@
 ---
 import Header from "./Header.svelte";
+import Test from "./test.svelte";
 ---
 
 <html lang="en">
@@ -12,8 +13,10 @@ import Header from "./Header.svelte";
   </head>
   <body>
     <Header client:only={"svelte"} />
+
     <div class="container mx-auto">
       <slot />
+      <Test client:only />
     </div>
   </body>
 </html>
