@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from "svelte";
+  import { courseId } from "../stores/stores.js";
   let courses = [];
 
   async function fetchCourses() {
@@ -12,13 +13,14 @@
     }
   }
 
-  async function fetchCourse(courseId) {
-    const response = await fetch(`/api/getCourse?courseId=${courseId}`, {
+  async function fetchCourse(id) {
+    const response = await fetch(`/api/getCourse?courseId=${id}`, {
       method: "GET",
     });
     if (response.ok) {
       const course = await response.json();
-      console.log(course);
+      courseId.set(course[0].id);
+      console.log(course[0].id);
     } else {
       throw new Error("Error fetching course");
     }
