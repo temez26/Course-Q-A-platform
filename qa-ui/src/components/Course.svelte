@@ -1,12 +1,12 @@
 <script>
   import { onMount } from "svelte";
   import { get } from "svelte/store";
-  import { courseId } from "../stores/stores.js"; // import courseId from the store
+  import { courseId } from "../stores/stores.js";
 
   let course = null;
 
   async function fetchCourse() {
-    let coursei = get(courseId); // get the courseId from the store
+    let coursei = get(courseId);
     console.log(coursei);
     const response = await fetch(`/api/getCourse?courseId=${coursei}`, {
       method: "GET",
@@ -21,7 +21,7 @@
     }
   }
 
-  onMount(fetchCourse); // fetch the course when the component is mounted
+  onMount(fetchCourse);
 </script>
 
 <div>
