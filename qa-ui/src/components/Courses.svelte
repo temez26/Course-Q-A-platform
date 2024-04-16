@@ -13,20 +13,21 @@
     }
   }
 
-
-
   let cleanup;
 
   onMount(async () => {
     await fetchCourses();
-    cleanup = () => {
-     
-    };
+    cleanup = () => {};
   });
 
   onDestroy(() => {
     if (cleanup) cleanup();
   });
+
+  function selectCourse(id) {
+    $courseId = id;
+    window.location.href = `/course`;
+  }
 </script>
 
 <div class="grid grid-cols-2 gap-4">
@@ -37,14 +38,11 @@
         <div class="font-bold text-xl mb-2">{course.name}</div>
         <p class="text-gray-700 text-base">{course.description}</p>
         <button
-        on:click={() => {
-          courseId.set(course.id);
-          window.location.href = `/course`;
-        }}
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        View Course
-      </button>
+          on:click={() => selectCourse(course.id)}
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          View Course
+        </button>
       </div>
     </div>
   {/each}
