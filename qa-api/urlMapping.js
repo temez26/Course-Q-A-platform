@@ -5,8 +5,6 @@ import {
   postUpvote,
   getQuestions,
   getAnswers,
-  generateAnswer,
-  getboi,
   getllm,
   getCourse,
 } from "./endpoints.js";
@@ -16,11 +14,6 @@ export const urlMapping = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/" }),
     fn: getllm,
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/boi" }),
-    fn: getboi,
   },
   {
     method: "GET",
@@ -57,10 +50,5 @@ export const urlMapping = [
     method: "GET",
     pattern: new URLPattern({ pathname: "/getAnswers" }),
     fn: getAnswers,
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/generateAnswer" }),
-    fn: generateAnswer,
   },
 ];

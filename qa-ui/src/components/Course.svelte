@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { get } from "svelte/store";
-  import { courseId, currentCourse } from "../stores/stores.js"; // import the currentCourse store
+  import { courseId, currentCourse } from "../stores/stores.js";
 
   let course = null;
 
@@ -25,22 +25,21 @@
   onMount(fetchCourse);
 </script>
 
-<div>
-  <h1>Welcome to the course page</h1>
+<div class="bg-gray-100 p-6">
+  <h1 class="text-3xl font-bold mb-4">Welcome to the course page</h1>
   {#if course}
-    <h2>{course.name}</h2>
-    <p>{course.description}</p>
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-2">{course.name}</h2>
+      <p class="text-gray-600">{course.description}</p>
+    </div>
   {:else}
     <p>Loading...</p>
   {/if}
   <a href="/courses">
     <button
-      class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
     >
       Back to Courses
-    </button></a
-  >
+    </button>
+  </a>
 </div>
-
-<style>
-</style>
