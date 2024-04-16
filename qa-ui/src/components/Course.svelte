@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { get } from "svelte/store";
-  import { courseId } from "../stores/stores.js";
+  import { courseId, currentCourse } from "../stores/stores.js"; // import the currentCourse store
 
   let course = null;
 
@@ -14,6 +14,7 @@
     if (response.ok) {
       let result = await response.json();
       course = result[0];
+      currentCourse.set(course);
       console.log(course.name);
       console.log(course.description);
     } else {

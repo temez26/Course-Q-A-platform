@@ -10,3 +10,4 @@ export let courseId = writable(localStorage.getItem("courseId") || 0);
 
 courseId.subscribe((value) => localStorage.setItem("courseId", value));
 export const userUuid = writable(user);
+export const currentCourse = writable(null);
