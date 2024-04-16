@@ -1,5 +1,5 @@
 <script>
-  import { userUuid, currentCourse } from "../stores/stores.js";
+  import { userUuid } from "../stores/stores.js";
 
   let question = "";
 
