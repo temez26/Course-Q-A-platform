@@ -32,7 +32,13 @@
   {:else}
     <p>Loading...</p>
   {/if}
-  <a href="/courses">Back to Courses</a>
+  <a href="/courses">
+    <button
+      class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+    >
+      Back to Courses
+    </button></a
+  >
 </div>
 
 <style>

@@ -1,32 +1,18 @@
 <script>
-  function goToCourses() {
-    window.location.href = "/courses";
-  }
 </script>
 
 <div
-  class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+  class="min-h-screen flex items-center justify-center bg-gray-900 text-white"
 >
-  <div class="max-w-md w-full space-y-8">
-    <div>
-      <img class="mx-auto h-12 w-auto" src="/your-logo.png" alt="Your Logo" />
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Welcome to our platform
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        To get started, click the button below to view our courses.
-      </p>
-    </div>
-    <div class="mt-8 space-y-6">
+  <div class="text-center space-y-8">
+    <h1 class="text-4xl font-bold">Welcome to Our Platform</h1>
+    <p class="text-lg">Click the button below to view our courses.</p>
+    <a href="/courses">
       <button
-        on:click={goToCourses}
-        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
       >
-        Go to Courses
-      </button>
-    </div>
+        Courses
+      </button></a
+    >
   </div>
 </div>
-
-<style>
-</style>
