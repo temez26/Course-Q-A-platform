@@ -1,14 +1,10 @@
 import {
   getCourses,
-  postQuestion,
-  postAnswer,
   postUpvote,
-  getQuestions,
-  getAnswers,
-  generateAnswer,
-  getboi,
   getllm,
   getCourse,
+  getQuestionsAndAnswers,
+  getUpvotes,
 } from "./endpoints.js";
 
 export const urlMapping = [
@@ -16,11 +12,6 @@ export const urlMapping = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/" }),
     fn: getllm,
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/boi" }),
-    fn: getboi,
   },
   {
     method: "GET",
@@ -35,32 +26,17 @@ export const urlMapping = [
 
   {
     method: "POST",
-    pattern: new URLPattern({ pathname: "/postQuestion" }),
-    fn: postQuestion,
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/postAnswer" }),
-    fn: postAnswer,
-  },
-  {
-    method: "POST",
     pattern: new URLPattern({ pathname: "/postUpvote" }),
     fn: postUpvote,
   },
   {
     method: "GET",
-    pattern: new URLPattern({ pathname: "/getQuestions" }),
-    fn: getQuestions,
+    pattern: new URLPattern({ pathname: "/getUpvotes" }),
+    fn: getUpvotes,
   },
   {
     method: "GET",
-    pattern: new URLPattern({ pathname: "/getAnswers" }),
-    fn: getAnswers,
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/generateAnswer" }),
-    fn: generateAnswer,
+    pattern: new URLPattern({ pathname: "/getQuestionsAndAnswers" }),
+    fn: getQuestionsAndAnswers,
   },
 ];
