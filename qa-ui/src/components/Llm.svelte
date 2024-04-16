@@ -6,66 +6,24 @@
   let questionsAndAnswers = [];
 
   const askSomething = async () => {
-    let newAnswers = [];
-    for (let i = 0; i < 3; i++) {
-      const data = {
-        user: $userUuid,
-        question: question,
-        course: $currentCourse,
-      };
-      const response = await fetch("/api/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const jsonData = await response.json();
-      console.log(jsonData);
-      newAnswers.push(jsonData[0].generated_text);
-    }
-    return newAnswers;
-  };
-
-  const handleQuestionandAnswer = async () => {
-    answers = await askSomething();
-
-    console.log($courseId, question, $userUuid);
-
-    const questionData = {
+    const data = {
       user_id: $userUuid,
       question: question,
       course_id: $courseId,
     };
-    const questionResponse = await fetch("/api/postQuestion", {
+    const response = await fetch("/api/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(questionData),
+      body: JSON.stringify(data),
     });
 
-    const questionJsonData = await questionResponse.json();
-    console.log(questionJsonData.questionId);
-
-    for (let i = 0; i < answers.length; i++) {
-      const answerData = {
-        user_id: $userUuid,
-        answer: answers[i],
-        question_id: questionJsonData.questionId,
-      };
-      const answerResponse = await fetch("/api/postAnswer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(answerData),
-      });
-
-      const answerJsonData = await answerResponse.json();
-      console.log(answerJsonData);
-    }
+    const jsonData = await response.json();
+    console.log(jsonData);
+    const newAnswers = jsonData.answers;
+    answers = newAnswers;
+    return newAnswers;
   };
 
   const fetchQuestionsAndAnswers = async () => {
@@ -97,7 +55,7 @@
     class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
     on:click={async () => {
       await askSomething();
-      await handleQuestionandAnswer();
+
       question = "";
     }}
   >

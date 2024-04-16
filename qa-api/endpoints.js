@@ -2,16 +2,36 @@ import { sql } from "./database.js";
 
 export async function getllm(request) {
   const data = await request.json();
+  console.log(data);
+  // Insert the question into the database
+  let result =
+    await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
+  const questionId = result[0].id;
+  console.log(questionId);
 
-  const response = await fetch("http://llm-api:7000/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+  let allAnswers = [];
+
+  for (let j = 0; j < 3; j++) {
+    const response = await fetch("http://llm-api:7000/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const jsonData = await response.json();
+    const newAnswer = jsonData[0].generated_text; // Do not split the string
+    console.log(newAnswer);
+    allAnswers.push(newAnswer);
+    // Insert the answer into the database
+    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${data.user_id}, ${questionId})`;
+  }
+
+  return new Response(JSON.stringify({ answers: allAnswers, message: "OK" }), {
+    status: 200,
+    headers: new Headers({ "content-type": "application/json" }),
   });
-
-  return response;
 }
 
 export async function getCourses() {
