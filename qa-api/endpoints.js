@@ -2,13 +2,9 @@ import { sql } from "./database.js";
 
 export async function getllm(request) {
   const data = await request.json();
-  console.log(data);
-  // Insert the question into the database
   let result =
     await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
   const questionId = result[0].id;
-  console.log(questionId);
-
   let allAnswers = [];
 
   for (let j = 0; j < 3; j++) {
@@ -21,13 +17,10 @@ export async function getllm(request) {
     });
 
     const jsonData = await response.json();
-    const newAnswer = jsonData[0].generated_text; // Do not split the string
-    console.log(newAnswer);
+    const newAnswer = jsonData[0].generated_text;
     allAnswers.push(newAnswer);
-    // Insert the answer into the database
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${data.user_id}, ${questionId})`;
   }
-
   return new Response(JSON.stringify({ answers: allAnswers, message: "OK" }), {
     status: 200,
     headers: new Headers({ "content-type": "application/json" }),
@@ -62,52 +55,66 @@ export async function getCourse(request) {
   }
 }
 
-export async function postQuestion(request) {
+export async function postUpvote(request) {
   try {
     const data = await request.json();
-    const result =
-      await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
-    const questionId = result[0].id;
-    console.log(questionId);
+    const existingVote =
+      await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND answer_id = ${data.answer_id}`;
+    if (existingVote.length > 0) {
+      return new Response(
+        JSON.stringify({ message: "User has already upvoted this answer" }),
+        {
+          status: 220,
+          headers: new Headers({ "content-type": "application/json" }),
+        }
+      );
+    }
+    await sql`INSERT INTO UserVotes (user_id, answer_id) VALUES (${data.user_id}, ${data.answer_id})`;
+    await sql`UPDATE Answers SET votes = votes + 1 WHERE id = ${data.answer_id}`;
+    const updatedVoteCount =
+      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
     return new Response(
-      JSON.stringify({ message: "Question posted", questionId }),
+      JSON.stringify({
+        message: "Upvote posted",
+        votes: updatedVoteCount[0].votes,
+      }),
       {
         status: 200,
         headers: new Headers({ "content-type": "application/json" }),
       }
     );
   } catch (error) {
-    console.error("Error posting question:", error);
-    return new Response(JSON.stringify({ error: "Error posting question" }), {
-      status: 500,
-    });
-  }
-}
-export async function postAnswer(request) {
-  try {
-    const data = await request.json();
-    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
-    return new Response(JSON.stringify({ message: "Answer posted" }), {
-      status: 200,
-      headers: new Headers({ "content-type": "application/json" }),
-    });
-  } catch (error) {
-    console.error("Error posting answer:", error);
-    return new Response(JSON.stringify({ error: "Error posting answer" }), {
-      status: 500,
-    });
-  }
-}
-export async function postUpvote(request) {
-  try {
-    const data = await request.json();
-    await sql`INSERT INTO Upvotes (user_id, answer_id) VALUES (${data.user}, ${data.answer})`;
-    return new Response("Upvote posted", {
-      headers: new Headers({ "content-type": "text/plain" }),
-    });
-  } catch (error) {
     console.error("Error posting upvote:", error);
     return new Response("Error posting upvote", { status: 500 });
+  }
+}
+export async function getUpvotes(request) {
+  try {
+    const data = await request.json();
+    const votes =
+      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
+    if (votes.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "No answer found with this ID" }),
+        {
+          status: 404,
+          headers: new Headers({ "content-type": "application/json" }),
+        }
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        message: "Vote count fetched",
+        votes: votes[0].votes,
+      }),
+      {
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching vote count:", error);
+    return new Response("Error fetching vote count", { status: 500 });
   }
 }
 

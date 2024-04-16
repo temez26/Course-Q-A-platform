@@ -1,5 +1,6 @@
 <script>
-  import { userUuid, currentCourse, courseId } from "../stores/stores.js";
+  import { onMount } from "svelte";
+  import { userUuid, courseId } from "../stores/stores.js";
 
   let question = "";
   let answers = [];
@@ -20,9 +21,9 @@
     });
 
     const jsonData = await response.json();
-    console.log(jsonData);
     const newAnswers = jsonData.answers;
     answers = newAnswers;
+    fetchQuestionsAndAnswers();
     return newAnswers;
   };
 
@@ -40,7 +41,44 @@
     const jsonData = await response.json();
     questionsAndAnswers = jsonData;
   };
-  fetchQuestionsAndAnswers();
+
+  async function postUpvote(answerId) {
+    const response = await fetch("/api/postUpvote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
+    });
+    const jsonData = await response.json();
+    if (!response.ok) {
+      console.error("Error posting upvote");
+    }
+  }
+
+  async function getUpvotes(answerId) {
+    const response = await fetch("/api/getUpvotes", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ answer_id: answerId }),
+    });
+    const jsonData = await response.json();
+    return jsonData.votes;
+  }
+
+  onMount(async () => {
+    for (let answer of answers) {
+      answer.votes = await getUpvotes(answer.id);
+    }
+    for (let qna of questionsAndAnswers) {
+      for (let answer of qna.answers) {
+        answer.votes = await getUpvotes(answer.id);
+      }
+    }
+    fetchQuestionsAndAnswers();
+  });
 </script>
 
 <div class="bg-gray-100 p-6 mt-2">
@@ -55,7 +93,6 @@
     class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
     on:click={async () => {
       await askSomething();
-
       question = "";
     }}
   >
@@ -66,9 +103,12 @@
     <div class="mt-4 bg-white p-4 rounded-md">
       <h2 class="font-bold text-lg">LLM Answer {i + 1}:</h2>
       <p>{answer}</p>
+      <p>Upvotes: {answer.votes}</p>
+      <button on:click={() => postUpvote(answer.id)}>Upvote</button>
     </div>
   {/each}
 </div>
+
 <div class="bg-gray-100 p-6 mt-2">
   {#each questionsAndAnswers as qna, i (i)}
     <div class="mt-4 bg-white p-4 rounded-md">
@@ -77,7 +117,10 @@
       <h3 class="font-bold text-lg">Answers:</h3>
       <ul>
         {#each qna.answers as answer, j (j)}
-          <li>{answer.answer}</li>
+          <li>
+            {answer.answer} (Upvotes: {answer.votes})
+            <button on:click={() => postUpvote(answer.id)}>Upvote</button>
+          </li>
         {/each}
       </ul>
     </div>

@@ -10,6 +10,7 @@ CREATE TABLE Questions (
     user_id UUID,
     course_id INTEGER,
     question TEXT NOT NULL,
+    votes INTEGER DEFAULT 0,
     FOREIGN KEY(course_id) REFERENCES Courses(id)
 );
 
@@ -17,7 +18,14 @@ CREATE TABLE Answers (
     id SERIAL PRIMARY KEY,
     user_id UUID,
     question_id INTEGER,
-    answer TEXT NOT NULL,
+    answer TEXT,
     votes INTEGER DEFAULT 0,
     FOREIGN KEY(question_id) REFERENCES Questions(id)
+);
+
+CREATE TABLE UserVotes (
+    user_id UUID,
+    answer_id INTEGER,
+    FOREIGN KEY(answer_id) REFERENCES Answers(id),
+    PRIMARY KEY(user_id, answer_id)
 );
