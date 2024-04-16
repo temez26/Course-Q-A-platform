@@ -4,7 +4,7 @@
   const askSomething = async () => {
     const data = {
       user: $userUuid,
-      question: "???",
+      question: "what is the meaning of life?",
     };
 
     const response = await fetch("/api/", {
