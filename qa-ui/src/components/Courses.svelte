@@ -13,25 +13,14 @@
     }
   }
 
-  async function fetchCourse(id) {
-    const response = await fetch(`/api/getCourse?courseId=${id}`, {
-      method: "GET",
-    });
-    if (response.ok) {
-      const course = await response.json();
-      courseId.set(course[0].id);
-      console.log(course[0].id);
-    } else {
-      throw new Error("Error fetching course");
-    }
-  }
+
 
   let cleanup;
 
   onMount(async () => {
     await fetchCourses();
     cleanup = () => {
-      // perform cleanup here
+     
     };
   });
 
@@ -48,11 +37,14 @@
         <div class="font-bold text-xl mb-2">{course.name}</div>
         <p class="text-gray-700 text-base">{course.description}</p>
         <button
-          on:click={() => fetchCourse(course.id)}
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          View Course
-        </button>
+        on:click={() => {
+          courseId.set(course.id);
+          window.location.href = `/course`;
+        }}
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        View Course
+      </button>
       </div>
     </div>
   {/each}
