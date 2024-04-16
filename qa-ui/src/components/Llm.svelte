@@ -6,9 +6,8 @@
   let questionsAndAnswers = [];
 
   const askSomething = async () => {
-    let newAnswers = []; // create a new array to store the answers
+    let newAnswers = [];
     for (let i = 0; i < 3; i++) {
-      // make 3 requests
       const data = {
         user: $userUuid,
         question: question,
@@ -30,11 +29,10 @@
   };
 
   const handleQuestionandAnswer = async () => {
-    // First, get the answers from the LLM
     answers = await askSomething();
 
     console.log($courseId, question, $userUuid);
-    // Post the question
+
     const questionData = {
       user_id: $userUuid,
       question: question,
@@ -51,7 +49,6 @@
     const questionJsonData = await questionResponse.json();
     console.log(questionJsonData.questionId);
 
-    // Post the answers
     for (let i = 0; i < answers.length; i++) {
       const answerData = {
         user_id: $userUuid,
@@ -101,13 +98,12 @@
     on:click={async () => {
       await askSomething();
       await handleQuestionandAnswer();
-      question = ""; // clear the input field
+      question = "";
     }}
   >
     Ask!
   </button>
 
-  <!-- Output section -->
   {#each answers as answer, i (i)}
     <div class="mt-4 bg-white p-4 rounded-md">
       <h2 class="font-bold text-lg">LLM Answer {i + 1}:</h2>

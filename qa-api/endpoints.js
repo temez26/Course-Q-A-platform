@@ -66,7 +66,6 @@ export async function postQuestion(request) {
 export async function postAnswer(request) {
   try {
     const data = await request.json();
-    console.log(data);
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
     return new Response(JSON.stringify({ message: "Answer posted" }), {
       status: 200,
@@ -98,7 +97,6 @@ export async function getQuestionsAndAnswers(request) {
     const questions =
       await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
 
-    // Fetch the answers for each question
     for (let question of questions) {
       const answers =
         await sql`SELECT * FROM Answers WHERE question_id = ${question.id};`;
