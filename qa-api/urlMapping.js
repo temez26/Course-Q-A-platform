@@ -3,10 +3,9 @@ import {
   postQuestion,
   postAnswer,
   postUpvote,
-  getQuestions,
-  getAnswers,
   getllm,
   getCourse,
+  getQuestionsAndAnswers,
 } from "./endpoints.js";
 
 export const urlMapping = [
@@ -43,12 +42,7 @@ export const urlMapping = [
   },
   {
     method: "GET",
-    pattern: new URLPattern({ pathname: "/getQuestions" }),
-    fn: getQuestions,
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/getAnswers" }),
-    fn: getAnswers,
+    pattern: new URLPattern({ pathname: "/getQuestionsAndAnswers" }),
+    fn: getQuestionsAndAnswers,
   },
 ];

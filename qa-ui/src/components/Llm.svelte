@@ -2,7 +2,8 @@
   import { userUuid, currentCourse, courseId } from "../stores/stores.js";
 
   let question = "";
-  let answers = []; // variable to store the answers
+  let answers = [];
+  let questionsAndAnswers = [];
 
   const askSomething = async () => {
     let newAnswers = []; // create a new array to store the answers
@@ -25,10 +26,13 @@
       console.log(jsonData);
       newAnswers.push(jsonData[0].generated_text);
     }
-    answers = newAnswers;
+    return newAnswers;
   };
+
   const handleQuestionandAnswer = async () => {
-    let newAnswers = []; // create a new array to store the answers
+    // First, get the answers from the LLM
+    answers = await askSomething();
+
     console.log($courseId, question, $userUuid);
     // Post the question
     const questionData = {
@@ -45,14 +49,14 @@
     });
 
     const questionJsonData = await questionResponse.json();
-    console.log(questionJsonData);
+    console.log(questionJsonData.questionId);
 
     // Post the answers
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < answers.length; i++) {
       const answerData = {
-        user: $userUuid,
-        answer: answers + (i + 1),
-        question: question,
+        user_id: $userUuid,
+        answer: answers[i],
+        question_id: questionJsonData.questionId,
       };
       const answerResponse = await fetch("/api/postAnswer", {
         method: "POST",
@@ -64,20 +68,24 @@
 
       const answerJsonData = await answerResponse.json();
       console.log(answerJsonData);
-      newAnswers.push(answerJsonData[0].generated_text);
     }
-    answers = newAnswers;
   };
-  const getAnswers = async () => {
-    const answersResponse = await fetch(
-      `/api/getAnswers?questionId=${questionJsonData.id}`
-    );
-    const answersJsonData = await answersResponse.json();
-    console.log(answersJsonData);
-    let newAnswers = answersJsonData.map((answer) => answer.answer_text);
 
-    answers = newAnswers;
+  const fetchQuestionsAndAnswers = async () => {
+    const response = await fetch(
+      `/api/getQuestionsAndAnswers?courseId=${$courseId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const jsonData = await response.json();
+    questionsAndAnswers = jsonData;
   };
+  fetchQuestionsAndAnswers();
 </script>
 
 <div class="bg-gray-100 p-6 mt-2">
@@ -90,7 +98,11 @@
 
   <button
     class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-    on:click={(askSomething, handleQuestionandAnswer)}
+    on:click={async () => {
+      await askSomething();
+      await handleQuestionandAnswer();
+      question = ""; // clear the input field
+    }}
   >
     Ask!
   </button>
@@ -100,6 +112,20 @@
     <div class="mt-4 bg-white p-4 rounded-md">
       <h2 class="font-bold text-lg">LLM Answer {i + 1}:</h2>
       <p>{answer}</p>
+    </div>
+  {/each}
+</div>
+<div class="bg-gray-100 p-6 mt-2">
+  {#each questionsAndAnswers as qna, i (i)}
+    <div class="mt-4 bg-white p-4 rounded-md">
+      <h2 class="font-bold text-lg">Question {i + 1}:</h2>
+      <p>{qna.question}</p>
+      <h3 class="font-bold text-lg">Answers:</h3>
+      <ul>
+        {#each qna.answers as answer, j (j)}
+          <li>{answer.answer}</li>
+        {/each}
+      </ul>
     </div>
   {/each}
 </div>

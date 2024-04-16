@@ -45,30 +45,40 @@ export async function getCourse(request) {
 export async function postQuestion(request) {
   try {
     const data = await request.json();
-    console.log(data);
-    await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id})`;
-    return new Response("Question posted", {
-      headers: new Headers({ "content-type": "text/plain" }),
-    });
+    const result =
+      await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
+    const questionId = result[0].id;
+    console.log(questionId);
+    return new Response(
+      JSON.stringify({ message: "Question posted", questionId }),
+      {
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+      }
+    );
   } catch (error) {
     console.error("Error posting question:", error);
-    return new Response("Error posting question", { status: 500 });
+    return new Response(JSON.stringify({ error: "Error posting question" }), {
+      status: 500,
+    });
   }
 }
-
 export async function postAnswer(request) {
   try {
     const data = await request.json();
-    await sql`INSERT INTO Answers (answer_text, user_id, question_id) VALUES (${data.answer}, ${data.user}, ${data.question})`;
-    return new Response("Answer posted", {
-      headers: new Headers({ "content-type": "text/plain" }),
+    console.log(data);
+    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
+    return new Response(JSON.stringify({ message: "Answer posted" }), {
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
     });
   } catch (error) {
     console.error("Error posting answer:", error);
-    return new Response("Error posting answer", { status: 500 });
+    return new Response(JSON.stringify({ error: "Error posting answer" }), {
+      status: 500,
+    });
   }
 }
-
 export async function postUpvote(request) {
   try {
     const data = await request.json();
@@ -82,32 +92,27 @@ export async function postUpvote(request) {
   }
 }
 
-export async function getQuestions(request) {
+export async function getQuestionsAndAnswers(request) {
   try {
     const courseId = new URL(request.url).searchParams.get("courseId");
     const questions =
       await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
+
+    // Fetch the answers for each question
+    for (let question of questions) {
+      const answers =
+        await sql`SELECT * FROM Answers WHERE question_id = ${question.id};`;
+      question.answers = answers;
+    }
+
     return new Response(JSON.stringify(questions), {
       status: 200,
       headers: { "content-type": "application/json" },
     });
   } catch (error) {
-    console.error("Error fetching questions:", error);
-    return new Response("Error fetching questions", { status: 500 });
-  }
-}
-
-export async function getAnswers(request) {
-  try {
-    const questionId = new URL(request.url).searchParams.get("questionId");
-    const answers =
-      await sql`SELECT * FROM Answers WHERE question_id = ${questionId};`;
-    return new Response(JSON.stringify(answers), {
-      status: 200,
-      headers: { "content-type": "application/json" },
+    console.error("Error fetching questions and answers:", error);
+    return new Response("Error fetching questions and answers", {
+      status: 500,
     });
-  } catch (error) {
-    console.error("Error fetching answers:", error);
-    return new Response("Error fetching answers", { status: 500 });
   }
 }
