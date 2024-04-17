@@ -25,12 +25,14 @@
   onMount(fetchCourse);
 </script>
 
-<div class="bg-gray-100 p-6">
-  <h1 class="text-3xl font-bold mb-4">Welcome to the course page</h1>
+<div class="bg-gray-800 text-white p-6">
+  <h1 class="text-3xl font-bold text-blue-300 mb-4">
+    Welcome to the course page
+  </h1>
   {#if course}
-    <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="text-2xl font-bold mb-2">{course.name}</h2>
-      <p class="text-gray-600">{course.description}</p>
+    <div class="bg-gray-900 rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-blue-300 mb-2">{course.name}</h2>
+      <p class="text-lg">{course.description}</p>
     </div>
   {:else}
     <p>Loading...</p>
