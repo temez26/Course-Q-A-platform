@@ -132,65 +132,77 @@
   });
 </script>
 
-<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2">
-  <input
-    type="text"
-    bind:value={question}
-    class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
-    placeholder="Enter your question here"
-  />
-
-  <button
-    class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-    on:click={async () => {
-      await askSomething();
-      question = "";
-    }}
+<div class="max-h-screen flex flex-col">
+  <div
+    class="bg-gray-800 rounded bg-opacity-75 text-white p-6 mt-2 overflow-y-auto flex-grow"
   >
-    Ask!
-  </button>
+    <h1 class="text-4xl font-bold mb-4">Questions</h1>
 
-  {#each answers as answer, i (i)}
-    <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-      <h2 class="font-bold text-2xl text-blue-300">LLM Answer {i + 1}:</h2>
-      <p class="text-lg">{answer}</p>
-    </div>
-  {/each}
-</div>
+    <input
+      type="text"
+      bind:value={question}
+      class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
+      placeholder="Enter your question here"
+    />
 
-<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2">
-  {#each questionsAndAnswers as qna, i (i)}
-    <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-      <h2 class="font-bold text-2xl mb-2">Question {i + 1}:</h2>
-      <p class="text-4xl text-blue-200 mb-2">{qna.question}</p>
-      <div class="flex items-center mb-2">
-        <div class="bg-blue-500 text-white p-2 rounded-full mr-2">
-          <p class="font-bold">{qna.votes}</p>
-        </div>
-        <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          on:click={() => postUpvoteQuestion(qna.id)}>Upvote</button
-        >
-      </div>
-      <h3 class="font-bold text-xl mb-2">Answers:</h3>
-      <ul>
-        {#each qna.answers as answer, j (j)}
-          <li class="mb-2">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <div class="bg-green-500 text-white p-2 rounded-full mr-2">
-                  <p class="font-bold">{answer.votes}</p>
-                </div>
-                <p class="text-lg">{answer.answer}</p>
+    <button
+      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      on:click={async () => {
+        await askSomething();
+        question = "";
+      }}
+    >
+      Ask!
+    </button>
+    <div class=" mt-2 mb-2">
+      <div class="">
+        {#each answers as answer, i (i)}
+          <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
+            <h2 class="font-bold text-2xl text-blue-300">
+              LLM Answer {i + 1}:
+            </h2>
+            <p class="text-lg">{answer}</p>
+          </div>
+        {/each}
+
+        {#each questionsAndAnswers as qna, i (i)}
+          <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
+            <h2 class="font-bold text-2xl mb-2">Question {i + 1}:</h2>
+            <p class="text-4xl text-blue-200 mb-2">{qna.question}</p>
+            <div class="flex items-center mb-2">
+              <div class="bg-blue-500 text-white p-2 rounded-full mr-2">
+                <p class="font-bold">{qna.votes}</p>
               </div>
               <button
-                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-                on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                on:click={() => postUpvoteQuestion(qna.id)}>Upvote</button
               >
             </div>
-          </li>
+            <h3 class="font-bold text-xl mb-2">Answers:</h3>
+            <ul>
+              {#each qna.answers as answer, j (j)}
+                <li class="mb-2">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                      <div
+                        class="bg-green-500 text-white p-2 rounded-full mr-2"
+                      >
+                        <p class="font-bold">{answer.votes}</p>
+                      </div>
+                      <p class="text-lg">{answer.answer}</p>
+                    </div>
+                    <button
+                      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
+                      on:click={() => postUpvoteAnswer(answer.id)}
+                      >Upvote</button
+                    >
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          </div>
         {/each}
-      </ul>
+      </div>
     </div>
-  {/each}
+  </div>
 </div>
