@@ -14,17 +14,17 @@
       <div class="space-x-4">
         <a
           href="/terms"
-          class="text-lg text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
+          class="text-lg text-gray-200 hover:text-white hover:bg-gray-500 hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
           >Terms</a
         >
         <a
           href="/privacy"
-          class="text-lg text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
+          class="text-lg text-gray-200 hover:text-white hover:bg-gray-500 hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
           >Privacy</a
         >
         <a
           href="/contact"
-          class="text-lg text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
+          class="text-lg text-gray-200 hover:text-white hover:bg-gray-500 hover:bg-opacity-10 transition-all duration-200 ease-in-out rounded px-2"
           >Contact</a
         >
       </div>

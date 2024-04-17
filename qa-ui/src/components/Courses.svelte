@@ -31,9 +31,13 @@
 </script>
 
 <div
-  class="flex flex-col space-y-6 rounded bg-gray-800 bg-opacity-80 text-white p-6"
+  class="text-5xl font-bold mb-4 bg-gray-900 bg-opacity-80 text-white text-opacity-95 rounded p-8 w-full"
 >
-  <div class="text-5xl font-bold mb-4">Select the course you want</div>
+  Select any course you want
+</div>
+<div
+  class="flex flex-col space-y-6 rounded bg-gray-800 bg-opacity-80 text-white p-6 mx-6"
+>
   {#each courses as course (course.id)}
     <div
       class="rounded overflow-hidden shadow-lg bg-gray-900 transition-all duration-500 ease-in-out transform hover:rotate-1"
