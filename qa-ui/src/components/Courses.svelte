@@ -30,10 +30,11 @@
   }
 </script>
 
-<div class="grid grid-cols-2 gap-4 bg-gray-800 text-white p-6">
+<div class="flex flex-col space-y-6 rounded bg-gray-800 text-white p-6">
   {#each courses as course (course.id)}
-    <div class="rounded overflow-hidden shadow-lg bg-gray-900">
-      <img class="w-full" src={course.image} alt={course.name} />
+    <div
+      class="rounded overflow-hidden shadow-lg bg-gray-900 transition-all duration-500 ease-in-out transform hover:scale-105"
+    >
       <div class="px-6 py-4">
         <div class="font-bold text-2xl text-blue-300 mb-2">{course.name}</div>
         <p class="text-lg">{course.description}</p>
