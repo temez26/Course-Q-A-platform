@@ -103,14 +103,29 @@
     const jsonData = await response.json();
     return jsonData.votes;
   }
+  async function getQuestionVotes(questionId) {
+    const response = await fetch(
+      `/api/getQuestionVotes?question_id=${questionId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const jsonData = await response.json();
+    return jsonData.votes;
+  }
 
   onMount(async () => {
     for (let answer of answers) {
       answer.votes = await getUpvotes(answer.id);
+      qna.votes = await getQuestionVotes(qna.id);
     }
     for (let qna of questionsAndAnswers) {
       for (let answer of qna.answers) {
         answer.votes = await getUpvotes(answer.id);
+        qna.votes = await getQuestionVotes(qna.id);
       }
     }
     fetchQuestionsAndAnswers();

@@ -124,6 +124,39 @@ export async function getUpvotes(request) {
     return new Response("Error fetching vote count", { status: 500 });
   }
 }
+export async function getQuestionVotes(request) {
+  try {
+    // Get question_id from the query parameters instead of the request body
+    const url = new URL(request.url);
+    const question_id = url.searchParams.get("question_id");
+
+    const votes =
+      await sql`SELECT votes FROM Questions WHERE id = ${question_id}`;
+    if (votes.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "No question found with this ID" }),
+        {
+          status: 404,
+          headers: new Headers({ "content-type": "application/json" }),
+        }
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        message: "Vote count fetched",
+        votes: votes[0].votes,
+      }),
+      {
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching vote count:", error);
+    return new Response("Error fetching vote count", { status: 500 });
+  }
+}
+
 export async function postUpvoteQuestion(request) {
   try {
     const data = await request.json();
