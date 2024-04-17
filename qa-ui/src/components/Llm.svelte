@@ -43,30 +43,48 @@
   };
 
   async function postUpvote(answerId) {
-    const response = await fetch("/api/postUpvote", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
-    });
-    const jsonData = await response.json();
-    if (!response.ok) {
-      console.error("Error posting upvote");
+  const response = await fetch("/api/postUpvote", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
+  });
+  const jsonData = await response.json();
+  if (!response.ok) {
+    console.error("Error posting upvote");
+  } else {
+    // Get the updated upvote count
+    const updatedVotes = await getUpvotes(answerId);
+    console.log(updatedVotes);
+    // Update the votes property of the corresponding answer in the answers array
+    const answerInAnswers = answers.find(answer => answer.id === answerId);
+    if (answerInAnswers) {
+      answerInAnswers.votes = updatedVotes;
     }
-  }
+    answers = answers; // Trigger Svelte's reactivity
 
-  async function getUpvotes(answerId) {
-    const response = await fetch("/api/getUpvotes", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ answer_id: answerId }),
-    });
-    const jsonData = await response.json();
-    return jsonData.votes;
+    // Update the votes property of the corresponding answer in the questionsAndAnswers array
+    for (let qna of questionsAndAnswers) {
+      const answerInQna = qna.answers.find(answer => answer.id === answerId);
+      if (answerInQna) {
+        answerInQna.votes = updatedVotes;
+      }
+    }
+    questionsAndAnswers = questionsAndAnswers; // Trigger Svelte's reactivity
   }
+}
+
+async function getUpvotes(answerId) {
+  const response = await fetch(`/api/getUpvotes?answer_id=${answerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const jsonData = await response.json();
+  return jsonData.votes;
+}
 
   onMount(async () => {
     for (let answer of answers) {

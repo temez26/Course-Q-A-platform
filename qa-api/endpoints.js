@@ -90,9 +90,11 @@ export async function postUpvote(request) {
 }
 export async function getUpvotes(request) {
   try {
-    const data = await request.json();
-    const votes =
-      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
+    // Get answer_id from the query parameters instead of the request body
+    const url = new URL(request.url);
+    const answer_id = url.searchParams.get('answer_id');
+
+    const votes = await sql`SELECT votes FROM Answers WHERE id = ${answer_id}`;
     if (votes.length === 0) {
       return new Response(
         JSON.stringify({ message: "No answer found with this ID" }),
