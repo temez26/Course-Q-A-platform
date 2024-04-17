@@ -43,48 +43,66 @@
   };
 
   async function postUpvote(answerId) {
-  const response = await fetch("/api/postUpvote", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
-  });
-  const jsonData = await response.json();
-  if (!response.ok) {
-    console.error("Error posting upvote");
-  } else {
-    // Get the updated upvote count
-    const updatedVotes = await getUpvotes(answerId);
-    console.log(updatedVotes);
-    // Update the votes property of the corresponding answer in the answers array
-    const answerInAnswers = answers.find(answer => answer.id === answerId);
-    if (answerInAnswers) {
-      answerInAnswers.votes = updatedVotes;
+    const response = await fetch("/api/postUpvote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
+    });
+    const jsonData = await response.json();
+    const updatedVotes = jsonData.votes;
+    console.log(jsonData.votes);
+    if (!response.ok) {
+      console.error("Error posting upvote");
+    } else {
+      questionsAndAnswers = questionsAndAnswers.map((qna) => {
+        return {
+          ...qna,
+          answers: qna.answers.map((answer) => {
+            if (answer.id === answerId) {
+              return { ...answer, votes: updatedVotes };
+            } else {
+              return answer;
+            }
+          }),
+        };
+      });
     }
-    answers = answers; // Trigger Svelte's reactivity
-
-    // Update the votes property of the corresponding answer in the questionsAndAnswers array
-    for (let qna of questionsAndAnswers) {
-      const answerInQna = qna.answers.find(answer => answer.id === answerId);
-      if (answerInQna) {
-        answerInQna.votes = updatedVotes;
-      }
-    }
-    questionsAndAnswers = questionsAndAnswers; // Trigger Svelte's reactivity
   }
-}
+  async function postUpvoteQuestion(questionId) {
+    const response = await fetch("/api/postUpvoteQuestion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: $userUuid, question_id: questionId }),
+    });
+    const jsonData = await response.json();
+    const updatedVotes = jsonData.votes;
+    if (!response.ok) {
+      console.error("Error posting upvote");
+    } else {
+      questionsAndAnswers = questionsAndAnswers.map((qna) => {
+        if (qna.id === questionId) {
+          return { ...qna, votes: updatedVotes };
+        } else {
+          return qna;
+        }
+      });
+    }
+  }
 
-async function getUpvotes(answerId) {
-  const response = await fetch(`/api/getUpvotes?answer_id=${answerId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const jsonData = await response.json();
-  return jsonData.votes;
-}
+  async function getUpvotes(answerId) {
+    const response = await fetch(`/api/getUpvotes?answer_id=${answerId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const jsonData = await response.json();
+    return jsonData.votes;
+  }
 
   onMount(async () => {
     for (let answer of answers) {
@@ -132,6 +150,8 @@ async function getUpvotes(answerId) {
     <div class="mt-4 bg-white p-4 rounded-md">
       <h2 class="font-bold text-lg">Question {i + 1}:</h2>
       <p>{qna.question}</p>
+      <p>Upvotes: {qna.votes}</p>
+      <button on:click={() => postUpvoteQuestion(qna.id)}>Upvote</button>
       <h3 class="font-bold text-lg">Answers:</h3>
       <ul>
         {#each qna.answers as answer, j (j)}

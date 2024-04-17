@@ -60,9 +60,14 @@ export async function postUpvote(request) {
     const data = await request.json();
     const existingVote =
       await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND answer_id = ${data.answer_id}`;
+    const currentVoteCount =
+      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
     if (existingVote.length > 0) {
       return new Response(
-        JSON.stringify({ message: "User has already upvoted this answer" }),
+        JSON.stringify({
+          message: "User has already upvoted this answer",
+          votes: currentVoteCount[0].votes,
+        }),
         {
           status: 220,
           headers: new Headers({ "content-type": "application/json" }),
@@ -92,7 +97,7 @@ export async function getUpvotes(request) {
   try {
     // Get answer_id from the query parameters instead of the request body
     const url = new URL(request.url);
-    const answer_id = url.searchParams.get('answer_id');
+    const answer_id = url.searchParams.get("answer_id");
 
     const votes = await sql`SELECT votes FROM Answers WHERE id = ${answer_id}`;
     if (votes.length === 0) {
@@ -117,6 +122,44 @@ export async function getUpvotes(request) {
   } catch (error) {
     console.error("Error fetching vote count:", error);
     return new Response("Error fetching vote count", { status: 500 });
+  }
+}
+export async function postUpvoteQuestion(request) {
+  try {
+    const data = await request.json();
+    const existingVote =
+      await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND question_id = ${data.question_id}`;
+    const currentVoteCount =
+      await sql`SELECT votes FROM Questions WHERE id = ${data.question_id}`;
+    if (existingVote.length > 0) {
+      return new Response(
+        JSON.stringify({
+          message: "User has already upvoted this question",
+          votes: currentVoteCount[0].votes,
+        }),
+        {
+          status: 220,
+          headers: new Headers({ "content-type": "application/json" }),
+        }
+      );
+    }
+    await sql`INSERT INTO UserVotes (user_id, question_id) VALUES (${data.user_id}, ${data.question_id})`;
+    await sql`UPDATE Questions SET votes = votes + 1 WHERE id = ${data.question_id}`;
+    const updatedVoteCount =
+      await sql`SELECT votes FROM Questions WHERE id = ${data.question_id}`;
+    return new Response(
+      JSON.stringify({
+        message: "Upvote posted",
+        votes: updatedVoteCount[0].votes,
+      }),
+      {
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+      }
+    );
+  } catch (error) {
+    console.error("Error posting upvote:", error);
+    return new Response("Error posting upvote", { status: 500 });
   }
 }
 
