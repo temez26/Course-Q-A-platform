@@ -14,13 +14,20 @@ import Footer from "./Footer.svelte";
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      body {
+        background-image: url("../../public/assets/layered-peaks-haikei.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+    </style>
   </head>
-  <body class="font-sans bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+  <body class="font-sans text-gray-900 flex flex-col min-h-screen">
     <Header client:only={"svelte"} />
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-      <div class="mt-8 bg-white rounded-lg shadow p-6">
-        <slot />
+      <div class="rounded-lg flex-grow">
+        <slot class="" />
       </div>
     </div>
     <Footer client:only={"svelte"} />
