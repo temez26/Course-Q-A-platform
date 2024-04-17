@@ -132,7 +132,7 @@
   });
 </script>
 
-<div class="bg-gray-800 text-white p-6 mt-2">
+<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2">
   <input
     type="text"
     bind:value={question}
@@ -158,7 +158,7 @@
   {/each}
 </div>
 
-<div class="bg-gray-800 text-white p-6 mt-2">
+<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2">
   {#each questionsAndAnswers as qna, i (i)}
     <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
       <h2 class="font-bold text-2xl mb-2">Question {i + 1}:</h2>

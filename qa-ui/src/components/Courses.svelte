@@ -30,7 +30,9 @@
   }
 </script>
 
-<div class="flex flex-col space-y-6 rounded bg-gray-800 text-white p-6">
+<div
+  class="flex flex-col space-y-6 rounded bg-gray-800 bg-opacity-75 text-white p-6"
+>
   {#each courses as course (course.id)}
     <div
       class="rounded overflow-hidden shadow-lg bg-gray-900 transition-all duration-500 ease-in-out transform hover:scale-105"
