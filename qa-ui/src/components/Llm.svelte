@@ -136,7 +136,7 @@
   <input
     type="text"
     bind:value={question}
-    class="w-full px-3 py-2 placeholder-gray-500 text-blue-300 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
+    class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
     placeholder="Enter your question here"
   />
 
