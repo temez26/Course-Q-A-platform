@@ -42,7 +42,7 @@
     questionsAndAnswers = jsonData;
   };
 
-  async function postUpvote(answerId) {
+  async function postUpvoteAnswer(answerId) {
     const response = await fetch("/api/postUpvote", {
       method: "POST",
       headers: {
@@ -93,7 +93,7 @@
     }
   }
 
-  async function getUpvotes(answerId) {
+  async function getAnswerVotes(answerId) {
     const response = await fetch(`/api/getUpvotes?answer_id=${answerId}`, {
       method: "GET",
       headers: {
@@ -119,12 +119,12 @@
 
   onMount(async () => {
     for (let answer of answers) {
-      answer.votes = await getUpvotes(answer.id);
+      answer.votes = await getAnswerVotes(answer.id);
       qna.votes = await getQuestionVotes(qna.id);
     }
     for (let qna of questionsAndAnswers) {
       for (let answer of qna.answers) {
-        answer.votes = await getUpvotes(answer.id);
+        answer.votes = await getAnswerVotes(answer.id);
         qna.votes = await getQuestionVotes(qna.id);
       }
     }
@@ -155,7 +155,7 @@
       <h2 class="font-bold text-lg">LLM Answer {i + 1}:</h2>
       <p>{answer}</p>
       <p>Upvotes: {answer.votes}</p>
-      <button on:click={() => postUpvote(answer.id)}>Upvote</button>
+      <button on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button>
     </div>
   {/each}
 </div>
@@ -172,7 +172,7 @@
         {#each qna.answers as answer, j (j)}
           <li>
             {answer.answer} (Upvotes: {answer.votes})
-            <button on:click={() => postUpvote(answer.id)}>Upvote</button>
+            <button on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button>
           </li>
         {/each}
       </ul>
