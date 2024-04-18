@@ -13,7 +13,7 @@
       >
     </div>
     <div class="flex flex-col lg:flex-row ">
-      <button class="lg:hidden" on:click={() => (isOpen = !isOpen)}>
+      <button class="lg:hidden bg-slate-800 rounded p-1" on:click={() => (isOpen = !isOpen)}>
         Menu
       </button>
       <ul
