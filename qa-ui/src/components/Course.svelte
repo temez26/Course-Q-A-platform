@@ -26,13 +26,11 @@
 </script>
 
 <div class="bg-gray-800 rounded bg-opacity-75 text-white p-6">
-  <h1 class="text-3xl font-bold text-blue-300 mb-4">
-    Welcome to the course page
-  </h1>
+  <h1 class="text-5xl font-bold mb-4">Welcome to the course page</h1>
   {#if course}
     <div class="bg-gray-900 rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-bold text-blue-300 mb-2">{course.name}</h2>
-      <p class="text-lg">{course.description}</p>
+      <h2 class="text-2xl font-bold text-gray-200 mb-2">{course.name}</h2>
+      <p class="text-lg text-gray-300">{course.description}</p>
     </div>
   {:else}
     <p>Loading...</p>
