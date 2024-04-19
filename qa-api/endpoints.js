@@ -19,7 +19,7 @@ export async function getllm(request) {
     const jsonData = await response.json();
     const newAnswer = jsonData[0].generated_text;
     allAnswers.push(newAnswer);
-    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${data.user_id}, ${questionId})`;
+    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
   }
   return new Response(JSON.stringify({ answers: allAnswers, message: "OK" }), {
     status: 200,
@@ -91,6 +91,40 @@ export async function postUpvote(request) {
   } catch (error) {
     console.error("Error posting upvote:", error);
     return new Response("Error posting upvote", { status: 500 });
+  }
+}
+export async function postUserAnswer(request) {
+  try {
+    const data = await request.json();
+
+    // Check if an answer from the user for the question already exists
+    const existingAnswer =
+      await sql`SELECT * FROM Answers WHERE user_id = ${data.user_id} AND question_id = ${data.question_id}`;
+
+    if (existingAnswer.length > 0) {
+      return new Response(
+        JSON.stringify({
+          message: "User has already posted an answer to this question",
+        }),
+        {
+          status: 200,
+          headers: new Headers({ "content-type": "application/json" }),
+        }
+      );
+    }
+
+    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
+
+    return new Response(
+      JSON.stringify({ message: "Answer posted successfully" }),
+      {
+        status: 200,
+        headers: new Headers({ "content-type": "application/json" }),
+      }
+    );
+  } catch (error) {
+    console.error("Error posting user answer:", error);
+    return new Response("Error posting user answer", { status: 500 });
   }
 }
 export async function getUpvotes(request) {
