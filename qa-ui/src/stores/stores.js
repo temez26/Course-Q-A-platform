@@ -7,6 +7,12 @@ if (!user) {
   localStorage.setItem("userUuid", user);
 }
 export let courseId = writable(localStorage.getItem("courseId") || 0);
+export const specificQuestionId = writable(
+  localStorage.getItem("specificQuestionId") || 0
+);
+specificQuestionId.subscribe((value) =>
+  localStorage.setItem("specificQuestionId", value)
+);
 
 courseId.subscribe((value) => localStorage.setItem("courseId", value));
 export const userUuid = writable(user);

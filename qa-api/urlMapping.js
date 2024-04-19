@@ -7,6 +7,7 @@ import {
   getUpvotes,
   postUpvoteQuestion,
   getQuestionVotes,
+  postUserAnswer,
 } from "./endpoints.js";
 
 export const urlMapping = [
@@ -29,6 +30,11 @@ export const urlMapping = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/postUpvoteQuestion" }),
     fn: postUpvoteQuestion,
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/postUserAnswer" }),
+    fn: postUserAnswer,
   },
 
   {
