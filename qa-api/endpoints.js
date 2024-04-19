@@ -232,9 +232,18 @@ export async function postUpvoteQuestion(request) {
 
 export async function getQuestionsAndAnswers(request) {
   try {
-    const courseId = new URL(request.url).searchParams.get("courseId");
-    const questions =
-      await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
+    const url = new URL(request.url);
+    const courseId = url.searchParams.get("courseId");
+    const questionId = url.searchParams.get("questionId");
+
+    let questions;
+    if (questionId) {
+      questions =
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId};`;
+    } else {
+      questions =
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
+    }
 
     for (let question of questions) {
       const answers =
