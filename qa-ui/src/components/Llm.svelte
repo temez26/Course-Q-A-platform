@@ -100,6 +100,12 @@
     if (!response.ok) {
       console.error("Error posting upvote");
     } else {
+      const index = questionsAndAnswers.findIndex(
+        (qna) => qna.id === questionId
+      );
+      if (index !== -1) {
+        questionsAndAnswers[index].last_activity = new Date().getTime(); // Update last_activity
+      }
       await fetchQuestionsAndAnswers();
       sortQuestions();
     }

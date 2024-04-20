@@ -229,6 +229,7 @@ export async function postUpvoteQuestion(request) {
     }
     await sql`INSERT INTO UserVotes (user_id, question_id) VALUES (${data.user_id}, ${data.question_id})`;
     await sql`UPDATE Questions SET votes = votes + 1 WHERE id = ${data.question_id}`;
+    await sql`UPDATE Questions SET last_activity = NOW() WHERE id = ${data.question_id}`;
     const updatedVoteCount =
       await sql`SELECT votes FROM Questions WHERE id = ${data.question_id}`;
     return new Response(
