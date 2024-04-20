@@ -11,6 +11,7 @@ CREATE TABLE Questions (
     course_id INTEGER,
     question TEXT,
     votes INTEGER DEFAULT 0,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(course_id) REFERENCES Courses(id)
 );
 
@@ -20,6 +21,7 @@ CREATE TABLE Answers (
     question_id INTEGER,
     answer TEXT,
     votes INTEGER DEFAULT 0,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(question_id) REFERENCES Questions(id)
 );
 

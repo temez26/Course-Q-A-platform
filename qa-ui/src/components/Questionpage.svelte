@@ -2,11 +2,9 @@
   import { onMount } from "svelte";
   import { userUuid, courseId, specificQuestionId } from "../stores/stores.js";
 
-
   let userAnswer = "";
 
   let questionsAndAnswers = [];
-
 
   const fetchQuestionsAndAnswers = async () => {
     console.log($specificQuestionId);
@@ -98,8 +96,12 @@
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
 >
   <h1 class="text-4xl font-bold mb-2">Question</h1>
-  <a href="course/"><button class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Back to Course</button></a>
-
+  <a href="course/"
+    ><button
+      class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
+      >Back to Course</button
+    ></a
+  >
 
   <div class="mt-2 mb-2 flex-grow overflow-y-auto">
     <div class="">

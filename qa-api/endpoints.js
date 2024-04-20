@@ -246,15 +246,15 @@ export async function getQuestionsAndAnswers(request) {
     let questions;
     if (questionId) {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId};`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId} ORDER BY last_activity DESC;`;
     } else {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC;`;
     }
 
     for (let question of questions) {
       const answers =
-        await sql`SELECT * FROM Answers WHERE question_id = ${question.id};`;
+        await sql`SELECT * FROM Answers WHERE question_id = ${question.id} ORDER BY last_activity DESC;`;
       question.answers = answers;
     }
 
