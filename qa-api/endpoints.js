@@ -7,24 +7,41 @@ export async function getllm(request) {
   const questionId = result[0].id;
   let allAnswers = [];
 
-  for (let j = 0; j < 3; j++) {
-    const response = await fetch("http://llm-api:7000/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+  // Create an array of promises for the fetch requests
+  const fetchPromises = Array(3)
+    .fill()
+    .map(() =>
+      fetch("http://llm-api:7000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+    );
 
+  // Wait for all the fetch requests to complete
+  const responses = await Promise.all(fetchPromises);
+
+  // Process the responses
+  for (const response of responses) {
     const jsonData = await response.json();
     const newAnswer = jsonData[0].generated_text;
     allAnswers.push(newAnswer);
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
   }
-  return new Response(JSON.stringify({ answers: allAnswers, message: "OK" }), {
-    status: 200,
-    headers: new Headers({ "content-type": "application/json" }),
-  });
+
+  return new Response(
+    JSON.stringify({
+      questionId: questionId,
+      answers: allAnswers,
+      message: "OK",
+    }),
+    {
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+    }
+  );
 }
 
 export async function getCourses() {
@@ -212,6 +229,7 @@ export async function postUpvoteQuestion(request) {
     }
     await sql`INSERT INTO UserVotes (user_id, question_id) VALUES (${data.user_id}, ${data.question_id})`;
     await sql`UPDATE Questions SET votes = votes + 1 WHERE id = ${data.question_id}`;
+    await sql`UPDATE Questions SET last_activity = NOW() WHERE id = ${data.question_id}`;
     const updatedVoteCount =
       await sql`SELECT votes FROM Questions WHERE id = ${data.question_id}`;
     return new Response(
@@ -239,15 +257,15 @@ export async function getQuestionsAndAnswers(request) {
     let questions;
     if (questionId) {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId};`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId} ORDER BY last_activity DESC;`;
     } else {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId};`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC;`;
     }
 
     for (let question of questions) {
       const answers =
-        await sql`SELECT * FROM Answers WHERE question_id = ${question.id};`;
+        await sql`SELECT * FROM Answers WHERE question_id = ${question.id} ORDER BY last_activity DESC;`;
       question.answers = answers;
     }
 
