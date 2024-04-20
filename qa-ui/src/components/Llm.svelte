@@ -5,12 +5,13 @@
   let question = "";
   let questionsAndAnswers = [];
   let tempId = 0;
-  let sortBy = localStorage.getItem("sortBy") || "newest";
+  let sortBy = localStorage.getItem("sortBy") || "mostUpvotes";
   let filterOn = localStorage.getItem("filterOn") === "true" ? true : false;
 
   const askSomething = async () => {
     const tempQuestionId = tempId++;
-    question = "";
+    const currentTime = new Date().getTime();
+
     questionsAndAnswers = [
       ...questionsAndAnswers,
       {
@@ -19,6 +20,7 @@
         llmAnswers: [],
         humanAnswers: [],
         votes: 0,
+        last_activity: currentTime, // Add this line
       },
     ];
 
@@ -37,7 +39,7 @@
     });
 
     const responseData = await response.json();
-
+    question = "";
     const index = questionsAndAnswers.findIndex(
       (qna) => qna.id === tempQuestionId
     );
@@ -78,11 +80,12 @@
         llmAnswers,
         humanAnswers,
         votes,
-        last_activity: qna.last_activity,
+        last_activity: new Date(qna.last_activity).getTime(),
       };
     });
 
     questionsAndAnswers = await Promise.all(updatedQuestionsAndAnswers);
+    sortQuestions();
     console.log(questionsAndAnswers);
   };
 
@@ -128,13 +131,12 @@
       questionsAndAnswers = [...questionsAndAnswers].sort(
         (a, b) => b.votes - a.votes
       );
-    } else if (sortBy === "newest") {
+    } else if (sortBy === "recentActivity") {
       questionsAndAnswers = [...questionsAndAnswers].sort(
-        (a, b) => b.id - a.id
+        (a, b) => b.last_activity - a.last_activity
       );
     }
   };
-
   onMount(async () => {
     await fetchQuestionsAndAnswers();
     sortQuestions();
@@ -178,23 +180,11 @@
     <button
       class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
       on:click={() => {
-        sortBy = "newest";
+        sortBy = "recentActivity";
         localStorage.setItem("sortBy", sortBy);
         filterOn = true;
         localStorage.setItem("filterOn", filterOn);
         sortQuestions();
-      }}
-    >
-      Newest
-    </button>
-    <button
-      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-      on:click={() => {
-        sortBy = "recentActivity";
-        localStorage.setItem("sortBy", sortBy);
-        filterOn = false;
-        localStorage.setItem("filterOn", filterOn);
-        fetchQuestionsAndAnswers();
       }}
     >
       Most recent activity

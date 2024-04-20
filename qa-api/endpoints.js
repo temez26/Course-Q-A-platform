@@ -7,20 +7,30 @@ export async function getllm(request) {
   const questionId = result[0].id;
   let allAnswers = [];
 
-  for (let j = 0; j < 3; j++) {
-    const response = await fetch("http://llm-api:7000/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+  // Create an array of promises for the fetch requests
+  const fetchPromises = Array(3)
+    .fill()
+    .map(() =>
+      fetch("http://llm-api:7000/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+    );
 
+  // Wait for all the fetch requests to complete
+  const responses = await Promise.all(fetchPromises);
+
+  // Process the responses
+  for (const response of responses) {
     const jsonData = await response.json();
     const newAnswer = jsonData[0].generated_text;
     allAnswers.push(newAnswer);
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
   }
+
   return new Response(
     JSON.stringify({
       questionId: questionId,
