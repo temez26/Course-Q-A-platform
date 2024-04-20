@@ -33,7 +33,7 @@
     questionsAndAnswers[index].id = responseData.questionId;
     questionsAndAnswers[index].votes = await getQuestionVotes(responseData.questionId);
   }
-  
+  sortQuestions();
   question = ""; 
 };
 
@@ -103,11 +103,14 @@ async function postUpvoteQuestion(questionId) {
   }
 
   const sortQuestions = () => {
-    if (sortBy === 'mostUpvotes') {
-      questionsAndAnswers = [...questionsAndAnswers].sort((a, b) => b.votes - a.votes);
-      filterOn = true; 
-    }
-  };
+  if (sortBy === 'mostUpvotes') {
+    questionsAndAnswers = [...questionsAndAnswers].sort((a, b) => b.votes - a.votes);
+    filterOn = true; 
+  } else if (sortBy === 'newest') {
+    questionsAndAnswers = [...questionsAndAnswers].sort((a, b) => b.id - a.id);
+    filterOn = true; 
+  }
+};
 
   onMount(async () => {
     await fetchQuestionsAndAnswers();
@@ -150,6 +153,16 @@ async function postUpvoteQuestion(questionId) {
       >
         Most Upvotes
       </button>
+      <button
+  class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+  on:click={() => {
+    sortBy = 'newest';
+    localStorage.setItem('sortBy', sortBy);
+    sortQuestions();
+  }}
+>
+  Newest
+</button>
   
       <button
         class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
