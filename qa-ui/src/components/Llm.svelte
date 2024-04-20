@@ -6,7 +6,7 @@
   let questionsAndAnswers = [];
   let tempId = 0;
   let sortBy = localStorage.getItem('sortBy') || 'newest'; 
-  let filterOn = sortBy === 'mostUpvotes'; 
+  let filterOn = localStorage.getItem('filterOn') === 'true' ? true : false
 
   const askSomething = async () => {
   const tempQuestionId = tempId++;
@@ -103,12 +103,14 @@ async function postUpvoteQuestion(questionId) {
   }
 
   const sortQuestions = () => {
+  if (!filterOn) {
+    return;
+  }
+
   if (sortBy === 'mostUpvotes') {
     questionsAndAnswers = [...questionsAndAnswers].sort((a, b) => b.votes - a.votes);
-    filterOn = true; 
   } else if (sortBy === 'newest') {
     questionsAndAnswers = [...questionsAndAnswers].sort((a, b) => b.id - a.id);
-    filterOn = true; 
   }
 };
 
@@ -144,34 +146,42 @@ async function postUpvoteQuestion(questionId) {
   
     <div class="mt-2 mb-2 overflow-y-auto" >
       <button
-        class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        on:click={() => {
-          sortBy = 'mostUpvotes';
-          localStorage.setItem('sortBy', sortBy);
-          sortQuestions();
-        }}
-      >
-        Most Upvotes
-      </button>
-      <button
-  class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-  on:click={() => {
-    sortBy = 'newest';
-    localStorage.setItem('sortBy', sortBy);
-    sortQuestions();
-  }}
->
-  Newest
-</button>
-  
-      <button
-        class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        on:click={resetFilter}
-      >
-        Reset Filter
-      </button>
-  
-      <p class="mt-2">{filterOn ? 'Filter is on' : 'Filter is off'}</p>
+      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      on:click={() => {
+        sortBy = 'mostUpvotes';
+        localStorage.setItem('sortBy', sortBy);
+        filterOn = true;
+        localStorage.setItem('filterOn', filterOn);
+        sortQuestions();
+      }}
+    >
+      Most Upvotes
+    </button>
+    <button
+      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      on:click={() => {
+        sortBy = 'newest';
+        localStorage.setItem('sortBy', sortBy);
+        filterOn = true;
+        localStorage.setItem('filterOn', filterOn);
+        sortQuestions();
+      }}
+    >
+      Newest
+    </button>
+    <button
+      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      on:click={() => {
+        sortBy = 'newest';
+        localStorage.setItem('sortBy', sortBy);
+        filterOn = false;
+        localStorage.setItem('filterOn', filterOn);
+        fetchQuestionsAndAnswers();
+      }}
+    >
+      Reset Filter
+    </button>
+      <p class="mt-2">{filterOn ? `Filtering by ${sortBy}` : 'Filter is off'}</p>
 
 
       {#each questionsAndAnswers as qna, i (i)}
