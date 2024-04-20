@@ -21,7 +21,7 @@ export async function getllm(request) {
     allAnswers.push(newAnswer);
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
   }
-  return new Response(JSON.stringify({ answers: allAnswers, message: "OK" }), {
+  return new Response(JSON.stringify({ questionId: questionId, answers: allAnswers, message: "OK" }), {
     status: 200,
     headers: new Headers({ "content-type": "application/json" }),
   });

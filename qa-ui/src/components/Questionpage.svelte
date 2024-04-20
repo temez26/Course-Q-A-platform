@@ -2,31 +2,12 @@
   import { onMount } from "svelte";
   import { userUuid, courseId, specificQuestionId } from "../stores/stores.js";
 
-  let question = "";
+
   let userAnswer = "";
-  let answers = [];
+
   let questionsAndAnswers = [];
 
-  const askSomething = async () => {
-    const data = {
-      user_id: $userUuid,
-      question: question,
-      course_id: $courseId,
-    };
-    const response = await fetch("/api/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
 
-    const jsonData = await response.json();
-    const newAnswers = jsonData.answers;
-    answers = newAnswers;
-    fetchQuestionsAndAnswers();
-    return newAnswers;
-  };
   const fetchQuestionsAndAnswers = async () => {
     console.log($specificQuestionId);
     const response = await fetch(
@@ -116,40 +97,15 @@
 <div
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
 >
-  <h1 class="text-4xl font-bold mb-4">Questions</h1>
+  <h1 class="text-4xl font-bold mb-2">Question</h1>
+  <a href="course/"><button class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded">Back to Course</button></a>
 
-  <input
-    type="text"
-    bind:value={question}
-    class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
-    placeholder="Enter your question here"
-  />
 
-  <button
-    class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-    on:click={async () => {
-      await askSomething();
-      question = "";
-    }}
-  >
-    Ask!
-  </button>
-  <div class="mt-2 mb-2">
-    {#each answers as answer, i (i)}
-      <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-        <h2 class="font-bold text-2xl text-blue-300">LLM Answer {i + 1}:</h2>
-        <p class="text-lg">{answer}</p>
-      </div>
-    {/each}
-  </div>
   <div class="mt-2 mb-2 flex-grow overflow-y-auto">
     <div class="">
       {#each questionsAndAnswers as qna, i (i)}
         <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-          <h2 class="font-bold text-2xl mb-2">
-            Question {i + 1}:
-            <span class="font-bold text-2xl font-serif">{qna.question}</span>
-          </h2>
+          <h1 class="text-2xl font-bold mb-4">{qna.question}</h1>
           <div class="flex items-center mb-2">
             <div class="bg-blue-500 text-white p-2 rounded-full mr-2">
               <p class="font-bold">{qna.votes}</p>
