@@ -7,50 +7,64 @@
   let questionsAndAnswers = [];
 
   const fetchQuestionsAndAnswers = async () => {
-    console.log($specificQuestionId);
-    const response = await fetch(
-      `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const jsonData = await response.json();
-    let updatedQuestionsAndAnswers = jsonData.map((qna) => {
-      const llmAnswers = [];
-      const humanAnswers = [];
-      for (let answer of qna.answers) {
-        if (answer.user_id === null) {
-          llmAnswers.push(answer);
-        } else {
-          humanAnswers.push(answer);
-        }
-      }
-      return { ...qna, llmAnswers, humanAnswers };
-    });
-
-    questionsAndAnswers = updatedQuestionsAndAnswers;
-  };
-
-  async function postUpvoteAnswer(answerId) {
-    const response = await fetch("/api/postUpvote", {
-      method: "POST",
+  console.log($specificQuestionId);
+  const response = await fetch(
+    `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}`,
+    {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
-    });
-    const jsonData = await response.json();
-    console.log(jsonData.votes);
-    if (!response.ok) {
-      console.error("Error posting upvote");
-    } else {
-      await fetchQuestionsAndAnswers();
     }
+  );
+
+  let jsonData = await response.json();
+  jsonData.sort((a, b) => {
+    const aLastActivity = new Date(a.answers[0]?.last_activity || a.last_activity);
+    const bLastActivity = new Date(b.answers[0]?.last_activity || b.last_activity);
+    return bLastActivity - aLastActivity;
+  });
+
+  let updatedQuestionsAndAnswers = jsonData.map((qna) => {
+    const llmAnswers = [];
+    const humanAnswers = [];
+    for (let answer of qna.answers) {
+      if (answer.user_id === null) {
+        llmAnswers.push(answer);
+      } else {
+        humanAnswers.push(answer);
+      }
+    }
+    return { ...qna, llmAnswers, humanAnswers };
+  });
+
+  questionsAndAnswers = updatedQuestionsAndAnswers;
+};
+
+async function postUpvoteAnswer(answerId) {
+  const response = await fetch("/api/postUpvote", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
+  });
+  const jsonData = await response.json();
+  console.log(jsonData.votes);
+  if (!response.ok) {
+    console.error("Error posting upvote");
+  } else {
+    // Update the last_activity field of the upvoted answer
+    for (let qna of questionsAndAnswers) {
+      for (let answer of qna.answers) {
+        if (answer.id === answerId) {
+          answer.last_activity = new Date();
+        }
+      }
+    }
+    await fetchQuestionsAndAnswers();
   }
+}
   async function postUpvoteQuestion(questionId) {
     const response = await fetch("/api/postUpvoteQuestion", {
       method: "POST",
