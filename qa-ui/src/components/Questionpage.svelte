@@ -7,6 +7,7 @@
     specificQuestionId,
     currentPage,
     userAnswer,
+    question,
   } from "../stores/stores.js";
 
   let questionsAndAnswers = [];
@@ -118,11 +119,10 @@
     if (!response.ok) {
       console.error("Error posting user answer");
     } else {
-      // Find the question in the array and update its last_activity field
       for (let qna of questionsAndAnswers) {
         if (qna.id === questionId) {
           qna.last_activity = new Date();
-          // Sort the answers based on last_activity
+
           qna.answers.sort((a, b) => {
             const aLastActivity = new Date(a.last_activity);
             const bLastActivity = new Date(b.last_activity);

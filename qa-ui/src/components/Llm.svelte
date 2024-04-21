@@ -1,16 +1,15 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import {
     userUuid,
     courseId,
     specificQuestionId,
     sortBy,
     filterOn,
-    questions,
+    question,
     tempId,
   } from "../stores/stores.js";
 
-  let question = $questions;
   let questionsAndAnswers = [];
 
   const askSomething = async () => {
@@ -21,7 +20,7 @@
       ...questionsAndAnswers,
       {
         id: tempQuestionId,
-        question: question,
+        question: $question,
         llmAnswers: [],
         humanAnswers: [],
         votes: 0,
@@ -31,7 +30,7 @@
 
     const data = {
       user_id: $userUuid,
-      question: question,
+      question: $question,
       course_id: $courseId,
     };
 
@@ -44,7 +43,7 @@
     });
 
     const responseData = await response.json();
-    question = "";
+    $question = "";
     const index = questionsAndAnswers.findIndex(
       (qna) => qna.id === tempQuestionId
     );
@@ -131,6 +130,10 @@
     await fetchQuestionsAndAnswers();
     sortQuestions();
   });
+  onDestroy(() => {
+    console.log("onDestroy is being called");
+    question.set("");
+  });
 </script>
 
 <div
@@ -140,7 +143,7 @@
 
   <input
     type="text"
-    bind:value={question}
+    bind:value={$question}
     class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
     placeholder="Enter your question here"
   />
