@@ -115,10 +115,25 @@ export async function postUserAnswer(request) {
   try {
     const data = await request.json();
 
-    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
+    // Insert the new answer into the database
+    const result = await sql`
+      INSERT INTO Answers (answer, user_id, question_id, last_activity) 
+      VALUES (${data.answer}, ${data.user_id}, ${data.question_id}, NOW())
+      RETURNING *;
+    `;
+
+    // Update the last_activity field of the question
+    await sql`
+      UPDATE Questions
+      SET last_activity = NOW()
+      WHERE id = ${data.question_id};
+    `;
 
     return new Response(
-      JSON.stringify({ message: "Answer posted successfully" }),
+      JSON.stringify({
+        message: "Answer posted successfully",
+        answer: result[0],
+      }),
       {
         status: 200,
         headers: new Headers({ "content-type": "application/json" }),
@@ -251,8 +266,18 @@ export async function getQuestionsAndAnswers(request) {
     }
 
     for (let question of questions) {
-      const answers =
-        await sql`SELECT * FROM Answers WHERE question_id = ${question.id} ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${currentPage * answersPerPage};`;
+      const answers = await sql`
+        (SELECT * FROM Answers WHERE question_id = ${
+          question.id
+        } AND user_id IS NULL)
+        UNION
+        (SELECT * FROM Answers WHERE question_id = ${
+          question.id
+        } AND user_id IS NOT NULL ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${
+        currentPage * answersPerPage
+      })
+        ORDER BY last_activity DESC;
+      `;
       question.answers = answers;
     }
 
