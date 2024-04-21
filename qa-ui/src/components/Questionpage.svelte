@@ -138,10 +138,15 @@
     if (window.location.href.includes("question")) {
       question.set("");
     }
-    fetchQuestionsAndAnswers();
+    await fetchQuestionsAndAnswers();
 
-    setTimeout(() => {
-      fetchQuestionsAndAnswers();
+    setTimeout(async () => {
+      if (
+        questionsAndAnswers.length === 0 ||
+        questionsAndAnswers[0].answers.length === 0
+      ) {
+        await fetchQuestionsAndAnswers();
+      }
     }, 2200);
   });
 </script>
