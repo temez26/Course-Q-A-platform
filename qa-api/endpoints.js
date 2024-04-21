@@ -5,6 +5,24 @@ export async function getllm(request) {
   let result =
     await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
   const questionId = result[0].id;
+
+  // Schedule handleLLMApi to run after this function has returned
+  queueMicrotask(() => handleLLMApi(data, questionId));
+
+  // Return the response to the frontend
+  return new Response(
+    JSON.stringify({
+      questionId: questionId,
+      message: "Question inserted successfully",
+    }),
+    {
+      status: 200,
+      headers: new Headers({ "content-type": "application/json" }),
+    }
+  );
+}
+
+async function handleLLMApi(data, questionId) {
   let allAnswers = [];
 
   // Create an array of promises for the fetch requests
@@ -25,25 +43,16 @@ export async function getllm(request) {
 
   // Process the responses
   for (const response of responses) {
-    const jsonData = await response.json();
-    const newAnswer = jsonData[0].generated_text;
-    allAnswers.push(newAnswer);
-    await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
-  }
-
-  return new Response(
-    JSON.stringify({
-      questionId: questionId,
-      answers: allAnswers,
-      message: "OK",
-    }),
-    {
-      status: 200,
-      headers: new Headers({ "content-type": "application/json" }),
+    if (response.ok) {
+      const jsonData = await response.json();
+      const newAnswer = jsonData[0].generated_text;
+      allAnswers.push(newAnswer);
+      await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
+    } else {
+      console.error(`Error: ${await response.text()}`);
     }
-  );
+  }
 }
-
 export async function getCourses() {
   try {
     const courses = await sql`SELECT * FROM Courses;`;
