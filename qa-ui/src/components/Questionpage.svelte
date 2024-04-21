@@ -139,6 +139,10 @@
       question.set("");
     }
     fetchQuestionsAndAnswers();
+
+    setTimeout(() => {
+      fetchQuestionsAndAnswers();
+    }, 2200);
   });
 </script>
 
@@ -183,24 +187,28 @@
       </div>
       <div class="bg-gray-800 p-4 rounded">
         <h3 class="font-bold text-xl mb-2">LLM Answers:</h3>
-        <ul>
-          {#each qna.llmAnswers as answer, j (j)}
-            <li class="mb-2">
-              <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                  <div class="bg-green-500 text-white p-2 rounded mr-2">
-                    <p class="font-bold">{answer.votes}</p>
+        {#if qna.llmAnswers.length === 0}
+          <p>Loading...</p>
+        {:else}
+          <ul>
+            {#each qna.llmAnswers as answer, j (j)}
+              <li class="mb-2">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="bg-green-500 text-white p-2 rounded mr-2">
+                      <p class="font-bold">{answer.votes}</p>
+                    </div>
+                    <p class="text-lg">{answer.answer}</p>
                   </div>
-                  <p class="text-lg">{answer.answer}</p>
+                  <button
+                    class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
+                    on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button
+                  >
                 </div>
-                <button
-                  class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
-                  on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button
-                >
-              </div>
-            </li>
-          {/each}
-        </ul>
+              </li>
+            {/each}
+          </ul>
+        {/if}
       </div>
 
       <div class="bg-gray-800 p-4 rounded">
