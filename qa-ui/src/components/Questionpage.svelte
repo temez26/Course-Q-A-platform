@@ -5,11 +5,24 @@
   let userAnswer = "";
 
   let questionsAndAnswers = [];
+  let currentPage = 0;
+const answersPerPage = 20;
 
-  const fetchQuestionsAndAnswers = async () => {
-  console.log($specificQuestionId);
+const nextPage = () => {
+  currentPage++;
+  fetchQuestionsAndAnswers();
+};
+
+const prevPage = () => {
+  if (currentPage > 0) {
+    currentPage--;
+    fetchQuestionsAndAnswers();
+  }
+};
+
+const fetchQuestionsAndAnswers = async () => {
   const response = await fetch(
-    `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}`,
+    `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}&page=${currentPage}`,
     {
       method: "GET",
       headers: {
@@ -26,19 +39,22 @@
   });
 
   let updatedQuestionsAndAnswers = jsonData.map((qna) => {
-    const llmAnswers = [];
-    const humanAnswers = [];
-    for (let answer of qna.answers) {
-      if (answer.user_id === null) {
-        llmAnswers.push(answer);
-      } else {
-        humanAnswers.push(answer);
-      }
-    }
-    return { ...qna, llmAnswers, humanAnswers };
-  });
-
-  questionsAndAnswers = updatedQuestionsAndAnswers;
+  const llmAnswers = [];
+  const humanAnswers = [];
+  for (let answer of qna.answers) {
+  console.log('User ID:', answer.user_id);
+  if (answer.user_id === null) {
+    llmAnswers.push(answer);
+  } else {
+    humanAnswers.push(answer);
+  }
+}
+  console.log('LLM Answers:', llmAnswers);
+  console.log('Human Answers:', humanAnswers);
+  // Limit the human answers to the first 20
+  return { ...qna, llmAnswers, humanAnswers: humanAnswers.slice(0, 20) };
+});
+questionsAndAnswers = updatedQuestionsAndAnswers;
 };
 
 async function postUpvoteAnswer(answerId) {
@@ -54,7 +70,7 @@ async function postUpvoteAnswer(answerId) {
   if (!response.ok) {
     console.error("Error posting upvote");
   } else {
-    // Update the last_activity field of the upvoted answer
+    
     for (let qna of questionsAndAnswers) {
       for (let answer of qna.answers) {
         if (answer.id === answerId) {
@@ -147,29 +163,6 @@ async function postUpvoteAnswer(answerId) {
               }}>Submit</button
             >
           </div>
-
-          <div class="bg-gray-800 p-4 rounded">
-            <h3 class="font-bold text-xl mb-2">Human Answers:</h3>
-            <ul>
-              {#each qna.humanAnswers as answer, j (j)}
-                <li class="mb-2">
-                  <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                      <div class="bg-green-500 text-white p-2 rounded mr-2">
-                        <p class="font-bold">{answer.votes}</p>
-                      </div>
-                      <p class="text-lg">{answer.answer}</p>
-                    </div>
-                    <button
-                      class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
-                      on:click={() => postUpvoteAnswer(answer.id)}
-                      >Upvote</button
-                    >
-                  </div>
-                </li>
-              {/each}
-            </ul>
-          </div>
           <div class="bg-gray-800 p-4 rounded">
             <h3 class="font-bold text-xl mb-2">LLM Answers:</h3>
             <ul>
@@ -192,6 +185,33 @@ async function postUpvoteAnswer(answerId) {
               {/each}
             </ul>
           </div>
+
+          <div class="bg-gray-800 p-4 rounded">
+            <button on:click={prevPage}>Previous</button>
+  <span>Page {currentPage + 1}</span>
+  <button on:click={nextPage}>Next</button>
+  <h3 class="font-bold text-xl mb-2">Human Answers:</h3>
+            <ul>
+              {#each qna.humanAnswers as answer, j (j)}
+                <li class="mb-2">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                      <div class="bg-green-500 text-white p-2 rounded mr-2">
+                        <p class="font-bold">{answer.votes}</p>
+                      </div>
+                      <p class="text-lg">{answer.answer}</p>
+                    </div>
+                    <button
+                      class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
+                      on:click={() => postUpvoteAnswer(answer.id)}
+                      >Upvote</button
+                    >
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          </div>
+
         </div>
       {/each}
     </div>

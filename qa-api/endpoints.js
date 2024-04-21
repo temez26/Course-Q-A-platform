@@ -115,22 +115,6 @@ export async function postUserAnswer(request) {
   try {
     const data = await request.json();
 
-    // Check if an answer from the user for the question already exists
-    const existingAnswer =
-      await sql`SELECT * FROM Answers WHERE user_id = ${data.user_id} AND question_id = ${data.question_id}`;
-
-    if (existingAnswer.length > 0) {
-      return new Response(
-        JSON.stringify({
-          message: "User has already posted an answer to this question",
-        }),
-        {
-          status: 200,
-          headers: new Headers({ "content-type": "application/json" }),
-        }
-      );
-    }
-
     await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${data.answer}, ${data.user_id}, ${data.question_id})`;
 
     return new Response(
@@ -254,19 +238,21 @@ export async function getQuestionsAndAnswers(request) {
     const url = new URL(request.url);
     const courseId = url.searchParams.get("courseId");
     const questionId = url.searchParams.get("questionId");
+    const currentPage = Number(url.searchParams.get("page")) || 0;
+    const answersPerPage = 20;
 
     let questions;
     if (questionId) {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId} ORDER BY last_activity DESC;`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId} ORDER BY last_activity DESC LIMIT 20;`;
     } else {
       questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC;`;
+        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT 20;`;
     }
 
     for (let question of questions) {
       const answers =
-        await sql`SELECT * FROM Answers WHERE question_id = ${question.id} ORDER BY last_activity DESC;`;
+        await sql`SELECT * FROM Answers WHERE question_id = ${question.id} ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${currentPage * answersPerPage};`;
       question.answers = answers;
     }
 
