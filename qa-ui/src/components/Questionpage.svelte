@@ -1,27 +1,28 @@
 <script>
   import { onMount } from "svelte";
-  import { userUuid, courseId, specificQuestionId } from "../stores/stores.js";
 
-  let userAnswer = "";
+  import {
+    userUuid,
+    courseId,
+    specificQuestionId,
+    currentPage,
+    userAnswer,
+  } from "../stores/stores.js";
 
   let questionsAndAnswers = [];
-  let currentPage = 0;
 
   const nextPage = () => {
-    currentPage++;
+    currentPage.update((n) => n + 1);
     fetchQuestionsAndAnswers();
   };
 
   const prevPage = () => {
-    if (currentPage > 0) {
-      currentPage--;
-      fetchQuestionsAndAnswers();
-    }
+    currentPage.update((n) => (n > 0 ? n - 1 : n));
+    fetchQuestionsAndAnswers();
   };
-
   async function fetchQuestionsAndAnswers() {
     const response = await fetch(
-      `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}&page=${currentPage}`,
+      `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}&page=${$currentPage}`,
       {
         method: "GET",
         headers: {
@@ -165,15 +166,15 @@
         <h3 class="font-bold text-xl mb-2">Post Your Answer:</h3>
         <input
           type="text"
-          bind:value={userAnswer}
+          bind:value={$userAnswer}
           class="bg-gray-700 text-white p-2 rounded w-full mb-2"
           placeholder="Type your answer here..."
         />
         <button
           class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
           on:click={() => {
-            postUserAnswer(userAnswer, qna.id);
-            userAnswer = "";
+            postUserAnswer($userAnswer, qna.id);
+            $userAnswer = "";
           }}>Submit</button
         >
       </div>
@@ -207,7 +208,7 @@
           Previous
         </button>
         <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
-          Page {currentPage + 1}
+          Page {$currentPage + 1}
         </span>
         <button
           class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"

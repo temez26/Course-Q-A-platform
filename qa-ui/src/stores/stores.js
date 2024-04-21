@@ -26,3 +26,13 @@ export const currentCourse = writable(null);
 
 export let questions = writable("");
 export let tempId = writable(0);
+
+export let currentPage = writable(
+  parseInt(localStorage.getItem("currentPage")) || 0
+);
+currentPage.subscribe((value) =>
+  localStorage.setItem("currentPage", value.toString())
+);
+
+export let userAnswer = writable(localStorage.getItem("userAnswer") || "");
+userAnswer.subscribe((value) => localStorage.setItem("userAnswer", value));
