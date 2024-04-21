@@ -8,6 +8,8 @@
     filterOn,
     question,
     tempId,
+    userAnswer,
+    currentPage,
   } from "../stores/stores.js";
 
   let questionsAndAnswers = [];
@@ -127,12 +129,12 @@
     }
   };
   onMount(async () => {
+    if (window.location.href.includes("course")) {
+      currentPage.set(0);
+      userAnswer.set("");
+    }
     await fetchQuestionsAndAnswers();
     sortQuestions();
-  });
-  onDestroy(() => {
-    console.log("onDestroy is being called");
-    question.set("");
   });
 </script>
 

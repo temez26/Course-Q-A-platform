@@ -135,6 +135,9 @@
   }
 
   onMount(async () => {
+    if (window.location.href.includes("question")) {
+      question.set("");
+    }
     fetchQuestionsAndAnswers();
   });
 </script>
