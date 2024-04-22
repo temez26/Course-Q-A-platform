@@ -1,6 +1,25 @@
 import { sql } from "./database.js";
+import {
+  fetchCourses,
+  fetchCourse,
+  checkExistingVote,
+  getVoteCount,
+  insertUserVote,
+  incrementAnswerVotes,
+  updateLastActivity,
+  insertUserAnswer,
+  updateQuestionLastActivity,
+  checkExistingQuestionVote,
+  getQuestionVoteCount,
+  insertUserQuestionVote,
+  incrementQuestionVotes,
+  getSpecificQuestion,
+  getAllQuestions,
+  getAnswersForQuestion,
+} from "./databaseQueries.js";
 
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
+
 export async function getllm(request) {
   const data = await request.json();
   let result =
@@ -20,7 +39,7 @@ export async function getllm(request) {
     }
   );
 }
-// WHAT THE LLM API DOES
+
 async function handleLLMApi(data, questionId) {
   let allAnswers = [];
 
@@ -52,7 +71,7 @@ async function handleLLMApi(data, questionId) {
 // GETS ALL COURSES
 export async function getCourses() {
   try {
-    const courses = await sql`SELECT * FROM Courses;`;
+    const courses = await fetchCourses();
     return new Response(JSON.stringify(courses), {
       status: 200,
       headers: { "content-type": "application/json" },
@@ -68,7 +87,7 @@ export async function getCourses() {
 export async function getCourse(request) {
   try {
     const courseId = new URL(request.url).searchParams.get("courseId");
-    const course = await sql`SELECT * FROM Courses WHERE id = ${courseId};`;
+    const course = await fetchCourse(courseId);
     return new Response(JSON.stringify(course), {
       status: 200,
       headers: { "content-type": "application/json" },
@@ -83,15 +102,13 @@ export async function getCourse(request) {
 export async function postUpvote(request) {
   try {
     const data = await request.json();
-    const existingVote =
-      await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND answer_id = ${data.answer_id}`;
-    const currentVoteCount =
-      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
+    const existingVote = await checkExistingVote(data);
+    const currentVoteCount = await getVoteCount(data.answer_id);
     if (existingVote.length > 0) {
       return new Response(
         JSON.stringify({
           message: "User has already upvoted this answer",
-          votes: currentVoteCount[0].votes,
+          votes: currentVoteCount,
         }),
         {
           status: 220,
@@ -99,15 +116,14 @@ export async function postUpvote(request) {
         }
       );
     }
-    await sql`INSERT INTO UserVotes (user_id, answer_id) VALUES (${data.user_id}, ${data.answer_id})`;
-    await sql`UPDATE Answers SET votes = votes + 1 WHERE id = ${data.answer_id}`;
-    await sql`UPDATE Answers SET last_activity = NOW() WHERE id = ${data.answer_id}`;
-    const updatedVoteCount =
-      await sql`SELECT votes FROM Answers WHERE id = ${data.answer_id}`;
+    await insertUserVote(data);
+    await incrementAnswerVotes(data.answer_id);
+    await updateLastActivity(data.answer_id);
+    const updatedVoteCount = await getVoteCount(data.answer_id);
     return new Response(
       JSON.stringify({
         message: "Upvote posted",
-        votes: updatedVoteCount[0].votes,
+        votes: updatedVoteCount,
       }),
       {
         status: 200,
@@ -123,23 +139,12 @@ export async function postUpvote(request) {
 export async function postUserAnswer(request) {
   try {
     const data = await request.json();
-
-    const result = await sql`
-      INSERT INTO Answers (answer, user_id, question_id, last_activity) 
-      VALUES (${data.answer}, ${data.user_id}, ${data.question_id}, NOW())
-      RETURNING *;
-    `;
-
-    await sql`
-      UPDATE Questions
-      SET last_activity = NOW()
-      WHERE id = ${data.question_id};
-    `;
-
+    const answer = await insertUserAnswer(data);
+    await updateQuestionLastActivity(data.question_id);
     return new Response(
       JSON.stringify({
         message: "Answer posted successfully",
-        answer: result[0],
+        answer: answer,
       }),
       {
         status: 200,
@@ -155,17 +160,13 @@ export async function postUserAnswer(request) {
 export async function postUpvoteQuestion(request) {
   try {
     const data = await request.json();
-    const question_id = data.question_id;
-
-    const existingVote =
-      await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND question_id = ${question_id}`;
-    const currentVoteCount =
-      await sql`SELECT votes FROM Questions WHERE id = ${question_id}`;
+    const existingVote = await checkExistingQuestionVote(data);
+    const currentVoteCount = await getQuestionVoteCount(data.question_id);
     if (existingVote.length > 0) {
       return new Response(
         JSON.stringify({
           message: "User has already upvoted this question",
-          votes: currentVoteCount[0].votes,
+          votes: currentVoteCount,
         }),
         {
           status: 220,
@@ -173,15 +174,14 @@ export async function postUpvoteQuestion(request) {
         }
       );
     }
-    await sql`INSERT INTO UserVotes (user_id, question_id) VALUES (${data.user_id}, ${question_id})`;
-    await sql`UPDATE Questions SET votes = votes + 1 WHERE id = ${question_id}`;
-    await sql`UPDATE Questions SET last_activity = NOW() WHERE id = ${question_id}`;
-    const updatedVoteCount =
-      await sql`SELECT votes FROM Questions WHERE id = ${question_id}`;
+    await insertUserQuestionVote(data);
+    await incrementQuestionVotes(data.question_id);
+    await updateQuestionLastActivity(data.question_id);
+    const updatedVoteCount = await getQuestionVoteCount(data.question_id);
     return new Response(
       JSON.stringify({
         message: "Upvote posted",
-        votes: updatedVoteCount[0].votes,
+        votes: updatedVoteCount,
       }),
       {
         status: 200,
@@ -205,30 +205,20 @@ export async function getQuestionsAndAnswers(request) {
 
     let questions;
     if (questionId) {
-      questions = await sql`
-        SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId}
-        ORDER BY last_activity DESC;
-        `;
+      questions = await getSpecificQuestion(courseId, questionId);
     } else {
-      questions = await sql`
-        SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT ${questionsPerPage} OFFSET ${
-        currentPage * questionsPerPage
-      };
-        `;
+      questions = await getAllQuestions(
+        courseId,
+        questionsPerPage,
+        currentPage
+      );
     }
     for (let question of questions) {
-      const answers = await sql`
-        (SELECT * FROM Answers WHERE question_id = ${
-          question.id
-        } AND user_id IS NULL)
-        UNION
-        (SELECT * FROM Answers WHERE question_id = ${
-          question.id
-        } AND user_id IS NOT NULL ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${
-        currentPage * answersPerPage
-      })
-        ORDER BY last_activity DESC;
-      `;
+      const answers = await getAnswersForQuestion(
+        question.id,
+        answersPerPage,
+        currentPage
+      );
       question.answers = answers;
     }
 
