@@ -19,11 +19,9 @@ import {
 } from "./databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
-  const data = await request.json();
+  const data = await parseJson(request);
   const [{ id: questionId }] = await insertQuestion(data);
-
   queueMicrotask(() => handleLLMApi(data, questionId));
-
   return createResponse({
     questionId,
     message: "Question inserted successfully",
@@ -86,6 +84,7 @@ export const postUpvote = withErrorHandling(async (request) => {
     "Posting upvote successful"
   );
 });
+
 // HANDLING THE POSTING OF AN ANSWER
 export const postUserAnswer = withErrorHandling(async (request) => {
   const data = await parseJson(request);
@@ -93,6 +92,7 @@ export const postUserAnswer = withErrorHandling(async (request) => {
   await updateQuestionLastActivity(data.question_id);
   return createResponse("OK", "Success posting user answer");
 });
+
 // HANDLING THE UPVOTE OF A QUESTION
 export const postUpvoteQuestion = withErrorHandling(async (request) => {
   const data = await parseJson(request);
