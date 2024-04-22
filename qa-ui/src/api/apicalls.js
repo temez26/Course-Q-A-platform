@@ -9,6 +9,7 @@ import {
   updatedAnswers,
   specificQuestionId,
   userAnswer,
+  questionId,
 } from "../stores/stores.js";
 // for the course page component
 export const nextPage = () => {
@@ -164,11 +165,11 @@ export const postUpvoteQuestion = async (questionId) => {
   }
 };
 
-export async function postUserAnswer(questionId) {
+export async function postUserAnswer() {
   const data = {
     user_id: get(userUuid),
     answer: get(userAnswer),
-    question_id: questionId,
+    question_id: get(questionId),
   };
   const response = await fetch("/api/postUserAnswer", {
     method: "POST",
@@ -193,7 +194,7 @@ export async function postUserAnswer(questionId) {
         });
       }
     }
-    fetchQuestionsAndAnswers();
+    fetchAnswers();
   }
 }
 export async function postUpvoteAnswer(answerId) {
@@ -217,6 +218,6 @@ export async function postUpvoteAnswer(answerId) {
         }
       }
     }
-    await fetchQuestionsAndAnswers();
+    fetchAnswers();
   }
 }

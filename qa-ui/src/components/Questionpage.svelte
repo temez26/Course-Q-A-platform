@@ -7,8 +7,8 @@
     userAnswer,
     question,
     coursepage,
-    questionsAndAnswers,
     updatedAnswers,
+    questionId,
   } from "../stores/stores.js";
   import {
     fetchAnswers,
@@ -27,7 +27,7 @@
     await fetchAnswers();
 
     setTimeout(async () => {
-      const qna = get(questionsAndAnswers);
+      const qna = get(updatedAnswers);
       if (qna.length === 0 || qna[0].answers.length === 0) {
         await fetchAnswers();
       }
@@ -69,7 +69,9 @@
         <button
           class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
           on:click={() => {
-            postUserAnswer($userAnswer, qna.id);
+            questionId.set(qna.id);
+            postUserAnswer();
+
             $userAnswer = "";
           }}>Submit</button
         >
