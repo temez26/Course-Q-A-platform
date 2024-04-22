@@ -1,20 +1,21 @@
 import { sql } from "./database.js";
-
-// FOR GET COURSES
-export async function fetchCourses() {
-  const courses = await sql`SELECT * FROM Courses;`;
-  return courses;
+// INSERT QUESTIONS INTO QUESTIONS TABLE AND INSERT LLM ANSWERS TO ANSWERS TABLE
+export async function insertQuestion(data) {
+  return await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
 }
-// FOR GET COURSE
-export async function fetchCourse(courseId) {
-  const course = await sql`SELECT * FROM Courses WHERE id = ${courseId};`;
-  return course;
+
+export async function insertAnswer(newAnswer, questionId) {
+  return await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
+}
+// GET COURSES OR GET SPECIFIC COURSE
+export async function fetchCourses(courseId) {
+  return courseId
+    ? await sql`SELECT * FROM Courses WHERE id = ${courseId};`
+    : await sql`SELECT * FROM Courses;`;
 }
 // FOR POST UPVOTE: Checks if a user has already upvoted a specific answer
 export async function checkExistingVote(data) {
-  const existingVote =
-    await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND answer_id = ${data.answer_id}`;
-  return existingVote;
+  return await sql`SELECT * FROM UserVotes WHERE user_id = ${data.user_id} AND answer_id = ${data.answer_id}`;
 }
 
 // FOR POST UPVOTE: Gets the current vote count for a specific answer
@@ -28,14 +29,9 @@ export async function insertUserVote(data) {
   await sql`INSERT INTO UserVotes (user_id, answer_id) VALUES (${data.user_id}, ${data.answer_id})`;
 }
 
-// FOR POST UPVOTE: Increments the vote count for a specific answer
-export async function incrementAnswerVotes(answerId) {
-  await sql`UPDATE Answers SET votes = votes + 1 WHERE id = ${answerId}`;
-}
-
-// FOR POST UPVOTE: Updates the last activity timestamp for a specific answer
-export async function updateLastActivity(answerId) {
-  await sql`UPDATE Answers SET last_activity = NOW() WHERE id = ${answerId}`;
+// FOR POST UPVOTE: Increments the vote count for a specific answer and updates the last activity timestamp
+export async function incrementAnswerVotesAndUpdateActivity(answerId) {
+  await sql`UPDATE Answers SET votes = votes + 1, last_activity = NOW() WHERE id = ${answerId}`;
 }
 
 // FOR POST USER ANSWER: Inserts a new answer from a user for a specific question
@@ -46,6 +42,10 @@ export async function insertUserAnswer(data) {
       RETURNING *;
     `;
   return result[0];
+}
+// FOR POST UPVOTE QUESTION: Updates the last activity timestamp for a specific question
+export async function updateQuestionLastActivity(questionId) {
+  await sql`UPDATE Questions SET last_activity = NOW() WHERE id = ${questionId}`;
 }
 
 // FOR POST UPVOTE QUESTION: Checks if a user has already upvoted a specific question
@@ -70,11 +70,6 @@ export async function insertUserQuestionVote(data) {
 // FOR POST UPVOTE QUESTION: Increments the vote count for a specific question
 export async function incrementQuestionVotes(questionId) {
   await sql`UPDATE Questions SET votes = votes + 1 WHERE id = ${questionId}`;
-}
-
-// FOR POST UPVOTE QUESTION: Updates the last activity timestamp for a specific question
-export async function updateQuestionLastActivity(questionId) {
-  await sql`UPDATE Questions SET last_activity = NOW() WHERE id = ${questionId}`;
 }
 
 // FOR GET QUESTIONS AND ANSWERS: Gets a specific question for a specific course
