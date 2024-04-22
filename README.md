@@ -13,8 +13,7 @@ This platform is designed to facilitate Q&A interactions related to various cour
 To set up the project, follow these steps:
 
 1. Clone the repository.
-2. Run `npm install` in the `qa-ui` directory to install dependencies.
-3. Start the application using Docker Compose with the command `docker-compose up`.
+2. Start the application using Docker Compose with the command `docker compose up`.
 
 Please note that starting the application for the first time may take a while, as it also downloads the (small) large language model (approx. 250 megabytes) and packages it into an image.
 
