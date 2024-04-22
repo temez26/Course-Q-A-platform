@@ -15,9 +15,19 @@
     postUpvoteAnswer,
     postUpvoteQuestion,
     postUserAnswer,
-    prevPage1,
-    nextPage1,
   } from "../api/apicalls.js";
+
+  export const nextPage1 = () => {
+    $currentPage += 1;
+    fetchAnswers();
+  };
+
+  export const prevPage1 = () => {
+    if ($currentPage > 0) {
+      $currentPage -= 1;
+    }
+    fetchAnswers();
+  };
 
   onMount(async () => {
     if (window.location.href.includes("question")) {

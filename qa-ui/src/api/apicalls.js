@@ -12,27 +12,8 @@ import {
   questionId,
   course,
 } from "../stores/stores.js";
-// for the course page component
-export const nextPage = () => {
-  coursepage.update((n) => n + 1);
-  fetchQuestions(get(coursepage));
-};
 
-export const prevPage = () => {
-  coursepage.update((n) => (n > 0 ? n - 1 : 0));
-  fetchQuestions(get(coursepage));
-};
-// for the questionAnswer page component
-export const nextPage1 = () => {
-  currentPage.update((n) => n + 1);
-  fetchAnswers();
-};
-
-export const prevPage1 = () => {
-  currentPage.update((n) => (n > 0 ? n - 1 : n));
-  fetchAnswers();
-};
-// for the course page component
+// FOR THE COURSE PAGE COMPONENT
 export const askSomething = async () => {
   const data = {
     user_id: get(userUuid),
@@ -63,7 +44,36 @@ export const askSomething = async () => {
     ]);
   }
 };
-// for the quesionAnswer page component
+
+export const fetchQuestions = async () => {
+  const response = await fetch(
+    `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
+      coursepage
+    )}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const jsonData = await response.json();
+
+  questionsAndAnswers.set(
+    jsonData
+      .map((qna) => {
+        return {
+          ...qna,
+          answers: qna.answers,
+          votes: qna.votes,
+          last_activity: new Date(qna.last_activity).getTime(),
+        };
+      })
+      .sort((a, b) => b.last_activity - a.last_activity)
+  );
+};
+// FOR THE QUESTION ANSWER COMPONENT
 async function processAnswers(jsonData) {
   jsonData.sort((a, b) => {
     const aLastActivity = new Date(
@@ -95,36 +105,6 @@ async function processAnswers(jsonData) {
 
   return updatedQuestionsAndAnswers;
 }
-
-export const fetchQuestions = async () => {
-  const response = await fetch(
-    `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
-      coursepage
-    )}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const jsonData = await response.json();
-
-  questionsAndAnswers.set(
-    jsonData
-      .map((qna) => {
-        return {
-          ...qna,
-          answers: qna.answers,
-          votes: qna.votes,
-          last_activity: new Date(qna.last_activity).getTime(),
-        };
-      })
-      .sort((a, b) => b.last_activity - a.last_activity)
-  );
-};
-
 export const fetchAnswers = async () => {
   const response = await fetch(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
@@ -229,6 +209,8 @@ export async function fetchCourse() {
     throw new Error("Error fetching course");
   }
 }
+
+// FOR THE COURSES COMPONENT
 
 export async function fetchCourses() {
   const response = await fetch("/api/getCourses");

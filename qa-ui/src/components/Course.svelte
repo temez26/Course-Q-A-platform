@@ -11,13 +11,22 @@
   } from "../stores/stores.js";
   import {
     askSomething,
-    nextPage,
-    prevPage,
     fetchQuestions,
     postUpvoteQuestion,
     fetchCourse,
   } from "../api/apicalls.js";
 
+  export const nextPage = () => {
+    $coursepage += 1;
+    fetchQuestions($coursepage);
+  };
+
+  export const prevPage = () => {
+    if ($coursepage > 0) {
+      $coursepage -= 1;
+    }
+    fetchQuestions($coursepage);
+  };
   function handleQuestionClick(id) {
     specificQuestionId.set(id);
   }
