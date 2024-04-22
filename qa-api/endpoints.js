@@ -126,7 +126,7 @@ export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
   const answersPerPage = 20;
   const questionsPerPage = 20;
 
-  const questions = questionId
+  let questions = questionId
     ? await getSpecificQuestion(courseId, questionId)
     : await getAllQuestions(courseId, questionsPerPage, currentPage);
 
@@ -142,6 +142,9 @@ export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
 
   // Process answers
   const processedQuestions = await processAnswers(questions);
+
+  // Sort questions by last_activity
+  processedQuestions.sort((a, b) => b.last_activity - a.last_activity);
 
   return createResponse(
     processedQuestions,
