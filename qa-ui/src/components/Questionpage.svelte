@@ -1,151 +1,35 @@
 <script>
   import { onMount } from "svelte";
+  import { get } from "svelte/store";
 
   import {
-    userUuid,
-    courseId,
-    specificQuestionId,
     currentPage,
     userAnswer,
     question,
+    coursepage,
+    questionsAndAnswers,
+    updatedAnswers,
   } from "../stores/stores.js";
-
-  let questionsAndAnswers = [];
-
-  const nextPage = () => {
-    currentPage.update((n) => n + 1);
-    fetchQuestionsAndAnswers();
-  };
-
-  const prevPage = () => {
-    currentPage.update((n) => (n > 0 ? n - 1 : n));
-    fetchQuestionsAndAnswers();
-  };
-  async function fetchQuestionsAndAnswers() {
-    const response = await fetch(
-      `/api/getQuestionsAndAnswers?courseId=${$courseId}&questionId=${$specificQuestionId}&page=${$currentPage}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    let jsonData = await response.json();
-    jsonData.sort((a, b) => {
-      const aLastActivity = new Date(
-        a.answers[0]?.last_activity || a.last_activity
-      );
-      const bLastActivity = new Date(
-        b.answers[0]?.last_activity || b.last_activity
-      );
-      return bLastActivity - aLastActivity;
-    });
-
-    let updatedQuestionsAndAnswers = await Promise.all(
-      jsonData.map(async (qna) => {
-        const llmAnswers = [];
-        const humanAnswers = [];
-        for (let answer of qna.answers) {
-          console.log("User ID:", answer.user_id);
-          if (answer.user_id === null) {
-            llmAnswers.push(answer);
-          } else {
-            humanAnswers.push(answer);
-          }
-        }
-        console.log("LLM Answers:", llmAnswers);
-        console.log("Human Answers:", humanAnswers);
-        return { ...qna, llmAnswers, humanAnswers: humanAnswers.slice(0, 20) };
-      })
-    );
-
-    questionsAndAnswers = updatedQuestionsAndAnswers;
-  }
-
-  async function postUpvoteAnswer(answerId) {
-    const response = await fetch("/api/postUpvote", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: $userUuid, answer_id: answerId }),
-    });
-    const jsonData = await response.json();
-    console.log(jsonData.votes);
-    if (!response.ok) {
-      console.error("Error posting upvote");
-    } else {
-      for (let qna of questionsAndAnswers) {
-        for (let answer of qna.answers) {
-          if (answer.id === answerId) {
-            answer.last_activity = new Date();
-          }
-        }
-      }
-      await fetchQuestionsAndAnswers();
-    }
-  }
-  async function postUpvoteQuestion(questionId) {
-    const response = await fetch("/api/postUpvoteQuestion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: $userUuid, question_id: questionId }),
-    });
-
-    if (!response.ok) {
-      console.error("Error posting upvote");
-    } else {
-      await fetchQuestionsAndAnswers();
-    }
-  }
-  async function postUserAnswer(answer, questionId) {
-    const data = {
-      user_id: $userUuid,
-      answer: answer,
-      question_id: questionId,
-    };
-    const response = await fetch("/api/postUserAnswer", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      console.error("Error posting user answer");
-    } else {
-      for (let qna of questionsAndAnswers) {
-        if (qna.id === questionId) {
-          qna.last_activity = new Date();
-
-          qna.answers.sort((a, b) => {
-            const aLastActivity = new Date(a.last_activity);
-            const bLastActivity = new Date(b.last_activity);
-            return bLastActivity - aLastActivity;
-          });
-        }
-      }
-      fetchQuestionsAndAnswers();
-    }
-  }
+  import {
+    fetchAnswers,
+    postUpvoteAnswer,
+    postUpvoteQuestion,
+    postUserAnswer,
+    prevPage1,
+    nextPage1,
+  } from "../api/apicalls.js";
 
   onMount(async () => {
     if (window.location.href.includes("question")) {
       question.set("");
+      coursepage.set(0);
     }
-    await fetchQuestionsAndAnswers();
+    await fetchAnswers();
 
     setTimeout(async () => {
-      if (
-        questionsAndAnswers.length === 0 ||
-        questionsAndAnswers[0].answers.length === 0
-      ) {
-        await fetchQuestionsAndAnswers();
+      const qna = get(questionsAndAnswers);
+      if (qna.length === 0 || qna[0].answers.length === 0) {
+        await fetchAnswers();
       }
     }, 2200);
   });
@@ -162,7 +46,7 @@
     ></a
   >
 
-  {#each questionsAndAnswers as qna, i (i)}
+  {#each $updatedAnswers as qna, i (i)}
     <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
       <h1 class="text-2xl font-bold mb-4">{qna.question}</h1>
       <div class="flex items-center mb-2">
@@ -219,7 +103,7 @@
       <div class="bg-gray-800 p-4 rounded">
         <button
           class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded mr-2"
-          on:click={prevPage}
+          on:click={prevPage1}
         >
           Previous
         </button>
@@ -228,7 +112,7 @@
         </span>
         <button
           class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
-          on:click={nextPage}
+          on:click={nextPage1}
         >
           Next
         </button>

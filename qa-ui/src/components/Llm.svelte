@@ -1,140 +1,30 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import {
-    userUuid,
-    courseId,
     specificQuestionId,
-    sortBy,
-    filterOn,
     question,
-    tempId,
     userAnswer,
+    coursepage,
     currentPage,
+    questionsAndAnswers,
   } from "../stores/stores.js";
-
-  let questionsAndAnswers = [];
-
-  const askSomething = async () => {
-    const tempQuestionId = $tempId++;
-    const currentTime = new Date().getTime();
-
-    questionsAndAnswers = [
-      ...questionsAndAnswers,
-      {
-        id: tempQuestionId,
-        question: $question,
-        llmAnswers: [],
-        humanAnswers: [],
-        votes: 0,
-        last_activity: currentTime,
-      },
-    ];
-
-    const data = {
-      user_id: $userUuid,
-      question: $question,
-      course_id: $courseId,
-    };
-
-    const response = await fetch("/api/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    const responseData = await response.json();
-    $question = "";
-    const index = questionsAndAnswers.findIndex(
-      (qna) => qna.id === tempQuestionId
-    );
-    if (index !== -1) {
-      questionsAndAnswers[index].id = responseData.questionId;
-      questionsAndAnswers[index].llmAnswers = responseData.answers;
-    }
-    sortQuestions();
-  };
-
-  const fetchQuestionsAndAnswers = async () => {
-    const response = await fetch(
-      `/api/getQuestionsAndAnswers?courseId=${$courseId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const jsonData = await response.json();
-
-    questionsAndAnswers = jsonData.map((qna) => {
-      const llmAnswers = qna.answers.filter(
-        (answer) => answer.user_id === null
-      );
-      const humanAnswers = qna.answers.filter(
-        (answer) => answer.user_id !== null
-      );
-      return {
-        ...qna,
-        llmAnswers,
-        humanAnswers,
-        votes: qna.votes,
-        last_activity: new Date(qna.last_activity).getTime(),
-      };
-    });
-    sortQuestions();
-  };
-
-  async function postUpvoteQuestion(questionId) {
-    const response = await fetch("/api/postUpvoteQuestion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: $userUuid, question_id: questionId }),
-    });
-    if (!response.ok) {
-      console.error("Error posting upvote");
-    } else {
-      const index = questionsAndAnswers.findIndex(
-        (qna) => qna.id === questionId
-      );
-      if (index !== -1) {
-        questionsAndAnswers[index].last_activity = new Date().getTime();
-      }
-      await fetchQuestionsAndAnswers();
-      sortQuestions();
-    }
-  }
+  import {
+    askSomething,
+    nextPage,
+    prevPage,
+    fetchQuestionsAndAnswers,
+    postUpvoteQuestion,
+  } from "../api/apicalls.js";
 
   function handleQuestionClick(id) {
     specificQuestionId.set(id);
   }
-
-  const sortQuestions = () => {
-    if (!$filterOn) {
-      return;
-    }
-
-    if ($sortBy === "mostUpvotes") {
-      questionsAndAnswers = [...questionsAndAnswers].sort(
-        (a, b) => b.votes - a.votes
-      );
-    } else if ($sortBy === "recentActivity") {
-      questionsAndAnswers = [...questionsAndAnswers].sort(
-        (a, b) => b.last_activity - a.last_activity
-      );
-    }
-  };
   onMount(async () => {
     if (window.location.href.includes("course")) {
       currentPage.set(0);
       userAnswer.set("");
     }
     await fetchQuestionsAndAnswers();
-    sortQuestions();
   });
 </script>
 
@@ -160,33 +50,25 @@
   </button>
 
   <div class="mt-2 mb-2 overflow-y-auto">
-    <button
-      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-      on:click={() => {
-        sortBy.set("mostUpvotes");
-        localStorage.setItem("sortBy", $sortBy);
-        filterOn.set(true);
-        localStorage.setItem("filterOn", $filterOn);
-        sortQuestions();
-      }}
-    >
-      Most Upvotes
-    </button>
-    <button
-      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-      on:click={() => {
-        sortBy.set("recentActivity");
-        localStorage.setItem("sortBy", $sortBy);
-        filterOn.set(true);
-        localStorage.setItem("filterOn", $filterOn);
-        sortQuestions();
-      }}
-    >
-      Most recent activity
-    </button>
-    <p class="mt-2">{`Filtering by ${$sortBy}`}</p>
+    <div class="bg-gray-800 p-4 rounded">
+      <button
+        class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded mr-2"
+        on:click={prevPage}
+      >
+        Previous
+      </button>
+      <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
+        Page {$coursepage + 1}
+      </span>
+      <button
+        class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
+        on:click={nextPage}
+      >
+        Next
+      </button>
+    </div>
 
-    {#each questionsAndAnswers as qna, i (i)}
+    {#each $questionsAndAnswers as qna, i (i)}
       <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
         <div class="flex items-center justify-between">
           <h2 class="font-bold text-3xl mb-2">

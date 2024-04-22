@@ -264,16 +264,21 @@ export async function getQuestionsAndAnswers(request) {
     const questionId = url.searchParams.get("questionId");
     const currentPage = Number(url.searchParams.get("page")) || 0;
     const answersPerPage = 20;
+    const questionsPerPage = 20;
 
     let questions;
     if (questionId) {
-      questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId} ORDER BY last_activity DESC LIMIT 20;`;
+      questions = await sql`
+        SELECT * FROM Questions WHERE course_id = ${courseId} AND id = ${questionId}
+        ORDER BY last_activity DESC;
+        `;
     } else {
-      questions =
-        await sql`SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT 20;`;
+      questions = await sql`
+        SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT ${questionsPerPage} OFFSET ${
+        currentPage * questionsPerPage
+      };
+        `;
     }
-
     for (let question of questions) {
       const answers = await sql`
         (SELECT * FROM Answers WHERE question_id = ${

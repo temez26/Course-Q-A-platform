@@ -8,35 +8,36 @@ if (!user) {
 }
 export const userUuid = writable(user);
 
-export let courseId = writable(localStorage.getItem("courseId") || 0);
-courseId.subscribe((value) => localStorage.setItem("courseId", value));
+export let courseId = writable(sessionStorage.getItem("courseId") || 0);
+courseId.subscribe((value) => sessionStorage.setItem("courseId", value));
 
 export const specificQuestionId = writable(
-  localStorage.getItem("specificQuestionId") || 0
+  sessionStorage.getItem("specificQuestionId") || 0
 );
 specificQuestionId.subscribe((value) =>
-  localStorage.setItem("specificQuestionId", value)
-);
-
-export let sortBy = writable(localStorage.getItem("sortBy") || "mostUpvotes");
-
-export let filterOn = writable(
-  localStorage.getItem("filterOn") === "true" ? true : false
+  sessionStorage.setItem("specificQuestionId", value)
 );
 
 export let currentPage = writable(
-  parseInt(localStorage.getItem("currentPage")) || 0
+  parseInt(sessionStorage.getItem("currentPage")) || 0
 );
 currentPage.subscribe((value) =>
-  localStorage.setItem("currentPage", value.toString())
+  sessionStorage.setItem("currentPage", value.toString())
+);
+export let coursepage = writable(
+  parseInt(sessionStorage.getItem("coursepage")) || 0
+);
+coursepage.subscribe((value) =>
+  sessionStorage.setItem("coursepage", value.toString())
 );
 
-export let userAnswer = writable(localStorage.getItem("userAnswer") || "");
-userAnswer.subscribe((value) => localStorage.setItem("userAnswer", value));
+export let userAnswer = writable(sessionStorage.getItem("userAnswer") || "");
+userAnswer.subscribe((value) => sessionStorage.setItem("userAnswer", value));
 
-// Initialize questions with localStorage and subscribe to changes
-export let question = writable(localStorage.getItem("question") || "");
-question.subscribe((value) => localStorage.setItem("question", value));
+export let question = writable(sessionStorage.getItem("question") || "");
+question.subscribe((value) => sessionStorage.setItem("question", value));
 
 export let tempId = writable(0);
 export const currentCourse = writable(null);
+export let questionsAndAnswers = writable([]);
+export const updatedAnswers = writable([]);
