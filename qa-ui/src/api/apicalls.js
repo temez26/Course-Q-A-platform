@@ -10,28 +10,29 @@ import {
   specificQuestionId,
   userAnswer,
   questionId,
+  course,
 } from "../stores/stores.js";
 // for the course page component
 export const nextPage = () => {
   coursepage.update((n) => n + 1);
-  fetchQuestionsAndAnswers(get(coursepage));
+  fetchQuestions(get(coursepage));
 };
 
 export const prevPage = () => {
   coursepage.update((n) => (n > 0 ? n - 1 : 0));
-  fetchQuestionsAndAnswers(get(coursepage));
+  fetchQuestions(get(coursepage));
 };
-// for the question page component
+// for the questionAnswer page component
 export const nextPage1 = () => {
   currentPage.update((n) => n + 1);
-  fetchQuestionsAndAnswers();
+  fetchAnswers();
 };
 
 export const prevPage1 = () => {
   currentPage.update((n) => (n > 0 ? n - 1 : n));
-  fetchQuestionsAndAnswers();
+  fetchAnswers();
 };
-
+// for the course page component
 export const askSomething = async () => {
   const data = {
     user_id: get(userUuid),
@@ -62,8 +63,8 @@ export const askSomething = async () => {
     ]);
   }
 };
-
-export async function processQuestionsAndAnswers(jsonData) {
+// for the quesionAnswer page component
+async function processAnswers(jsonData) {
   jsonData.sort((a, b) => {
     const aLastActivity = new Date(
       a.answers[0]?.last_activity || a.last_activity
@@ -95,7 +96,7 @@ export async function processQuestionsAndAnswers(jsonData) {
   return updatedQuestionsAndAnswers;
 }
 
-export const fetchQuestionsAndAnswers = async () => {
+export const fetchQuestions = async () => {
   const response = await fetch(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
       coursepage
@@ -139,11 +140,13 @@ export const fetchAnswers = async () => {
   );
 
   const jsonData = await response.json();
-  let updatedAnswerData = await processQuestionsAndAnswers(jsonData);
+  let updatedAnswerData = await processAnswers(jsonData);
   updatedAnswers.set(updatedAnswerData);
 };
 
 export const postUpvoteQuestion = async (questionId) => {
+  console.log("Question ID:", questionId);
+  console.log("User ID:", get(userUuid));
   const response = await fetch("/api/postUpvoteQuestion", {
     method: "POST",
     headers: {
@@ -151,18 +154,14 @@ export const postUpvoteQuestion = async (questionId) => {
     },
     body: JSON.stringify({ user_id: get(userUuid), question_id: questionId }),
   });
+
   if (!response.ok) {
-    console.error("Error posting upvote");
-  } else {
-    questionsAndAnswers.update((qna) => {
-      const index = qna.findIndex((item) => item.id === questionId);
-      if (index !== -1) {
-        qna[index].last_activity = new Date().getTime();
-      }
-      return qna;
-    });
-    await fetchQuestionsAndAnswers();
+    const message = await response.text();
+    console.error(message);
+    return;
   }
+
+  fetchQuestions();
 };
 
 export async function postUserAnswer() {
@@ -219,5 +218,16 @@ export async function postUpvoteAnswer(answerId) {
       }
     }
     fetchAnswers();
+  }
+}
+export async function fetchCourse() {
+  const response = await fetch(`/api/getCourse?courseId=${get(courseId)}`, {
+    method: "GET",
+  });
+  if (response.ok) {
+    let result = await response.json();
+    course.set(result[0]);
+  } else {
+    throw new Error("Error fetching course");
   }
 }

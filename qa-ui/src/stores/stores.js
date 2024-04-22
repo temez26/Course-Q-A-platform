@@ -41,5 +41,5 @@ export let tempId = writable(0);
 export const currentCourse = writable(null);
 export let questionsAndAnswers = writable([]);
 export const updatedAnswers = writable([]);
-
+export let course = writable(null);
 export let questionId = writable(0);

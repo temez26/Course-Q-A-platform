@@ -35,9 +35,7 @@
   });
 </script>
 
-<div
-  class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
->
+<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col">
   <h1 class="text-4xl font-bold mb-2">Question</h1>
   <a href="course/"
     ><button
