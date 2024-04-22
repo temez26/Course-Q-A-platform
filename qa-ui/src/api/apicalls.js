@@ -14,123 +14,97 @@ import {
   course,
 } from "../stores/stores.js";
 
-// FOR THE COURSE PAGE COMPONENT
+const fetchData = async (url, method, data, store) => {
+  const result = await apiCall(url, method, data);
+  if (store) {
+    store.set(result);
+  }
+  return result;
+};
 
-export async function fetchCourse() {
-  const result = await apiCall(
+export const fetchCourse = async () => {
+  const result = await fetchData(
     `/api/getCourse?courseId=${get(courseId)}`,
     "GET"
   );
-
   course.set(result[0]);
-}
-
-export const askSomething = async () => {
-  const data = {
-    user_id: get(userUuid),
-    question: get(question),
-    course_id: get(courseId),
-  };
-
-  await apiCall("/api/", "POST", data);
-
-  question.set("");
-
-  fetchQuestions();
 };
 
-export const fetchQuestions = async () => {
-  const jsonData = await apiCall(
+export const askSomething = () =>
+  fetchData(
+    "/api/",
+    "POST",
+    {
+      user_id: get(userUuid),
+      question: get(question),
+      course_id: get(courseId),
+    },
+    null
+  ).then(() => {
+    question.set("");
+    fetchQuestions();
+  });
+
+export const fetchQuestions = () =>
+  fetchData(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
       coursepage
     )}`,
-    "GET"
+    "GET",
+    null,
+    questionsAndAnswers
   );
 
-  questionsAndAnswers.set(
-    jsonData
-      .map((qna) => {
-        return {
-          ...qna,
-          answers: qna.answers,
-          votes: qna.votes,
-          last_activity: new Date(qna.last_activity).getTime(),
-        };
-      })
-      .sort((a, b) => b.last_activity - a.last_activity)
-  );
-};
-// FOR THE QUESTIONANSWERS PAGE COMPONENT
-export const fetchAnswers = async () => {
-  const jsonData = await apiCall(
+export const fetchAnswers = () =>
+  fetchData(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
       specificQuestionId
     )}&page=${get(currentPage)}`,
-    "GET"
+    "GET",
+    null,
+    updatedAnswers
   );
 
-  updatedAnswers.set(jsonData);
-};
-export const postUpvoteQuestion = async (questionId) => {
-  await apiCall("/api/postUpvoteQuestion", "POST", {
-    user_id: get(userUuid),
-    question_id: questionId,
+export const postUpvoteQuestion = (questionId) =>
+  fetchData(
+    "/api/postUpvoteQuestion",
+    "POST",
+    {
+      user_id: get(userUuid),
+      question_id: questionId,
+    },
+    null
+  ).then(() => {
+    fetchAnswers();
+    fetchQuestions();
   });
 
-  fetchAnswers();
-  fetchQuestions();
-};
+export const postUserAnswer = () =>
+  fetchData(
+    "/api/postUserAnswer",
+    "POST",
+    {
+      user_id: get(userUuid),
+      answer: get(userAnswer),
+      question_id: get(questionId),
+    },
+    null
+  ).then(fetchAnswers);
 
-export async function postUserAnswer() {
-  const data = {
-    user_id: get(userUuid),
-    answer: get(userAnswer),
-    question_id: get(questionId),
-  };
+export const postUpvoteAnswer = (answerId) =>
+  fetchData(
+    "/api/postUpvote",
+    "POST",
+    {
+      user_id: get(userUuid),
+      answer_id: answerId,
+    },
+    null
+  ).then(fetchAnswers);
 
-  await apiCall("/api/postUserAnswer", "POST", data);
+export const fetchCourses = () => fetchData("/api/getCourses", "GET");
 
-  const qnaList = get(questionsAndAnswers);
-  for (let qna of qnaList) {
-    if (qna.id === questionId) {
-      qna.last_activity = new Date();
-
-      qna.answers.sort((a, b) => {
-        const aLastActivity = new Date(a.last_activity);
-        const bLastActivity = new Date(b.last_activity);
-        return bLastActivity - aLastActivity;
-      });
-    }
-  }
-  fetchAnswers();
-}
-export async function postUpvoteAnswer(answerId) {
-  const data = {
-    user_id: get(userUuid),
-    answer_id: answerId,
-  };
-  const response = await apiCall("/api/postUpvote", "POST", data);
-
-  const qnaList = get(questionsAndAnswers);
-  for (let qna of qnaList) {
-    for (let answer of qna.answers) {
-      if (answer.id === answerId) {
-        answer.last_activity = new Date();
-      }
-    }
-  }
-  fetchAnswers();
-}
-
-// FOR THE COURSES COMPONENT
-
-export async function fetchCourses() {
-  const courses = await apiCall("/api/getCourses", "GET");
-
-  return courses;
-}
-
-export function selectCourse(id, courseIdStore) {
+export const selectCourse = (id, courseIdStore) => {
   courseIdStore.set(id);
   window.location.href = `/course`;
-}
+};
