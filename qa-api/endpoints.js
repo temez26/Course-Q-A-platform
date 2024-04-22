@@ -95,7 +95,7 @@ export const postUserAnswer = withErrorHandling(async (request) => {
   const data = await parseJson(request);
   await insertUserAnswer(data);
   await updateQuestionLastActivity(data.question_id);
-  return createResponse("OK", "Success posting user answer");
+  return createResponse("Posting answer successful");
 });
 
 // HANDLING THE UPVOTE OF A QUESTION

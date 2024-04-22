@@ -1,13 +1,18 @@
 // Creating response
 export async function createResponse(data, errorMessage) {
   if (data) {
-    const payload = typeof data === "object" ? JSON.stringify(data) : data;
+    const payload =
+      typeof data === "object"
+        ? JSON.stringify(data)
+        : JSON.stringify({ message: data });
     return new Response(payload, {
       status: 200,
       headers: { "content-type": "application/json" },
     });
   } else {
-    return new Response(errorMessage, { status: 500 });
+    return new Response(JSON.stringify({ message: errorMessage }), {
+      status: 500,
+    });
   }
 }
 // Error handling

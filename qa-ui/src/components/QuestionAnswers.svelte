@@ -6,7 +6,6 @@
     currentPage,
     userAnswer,
     question,
-    coursepage,
     updatedAnswers,
     questionId,
   } from "../stores/stores.js";
@@ -32,7 +31,6 @@
   onMount(async () => {
     if (window.location.href.includes("question")) {
       question.set("");
-      coursepage.set(0);
     }
     await fetchAnswers();
 
