@@ -45,15 +45,28 @@ export const askSomething = () =>
     fetchQuestions();
   });
 
-export const fetchQuestions = () =>
+export const fetchQuestions = () => {
   fetchData(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
       coursepage
     )}`,
     "GET",
-    null,
-    questionsAndAnswers
-  );
+    null
+  ).then((jsonData) => {
+    questionsAndAnswers.set(
+      jsonData
+        .map((qna) => {
+          return {
+            ...qna,
+            answers: qna.answers,
+            votes: qna.votes,
+            last_activity: new Date(qna.last_activity).getTime(),
+          };
+        })
+        .sort((a, b) => b.last_activity - a.last_activity)
+    );
+  });
+};
 
 export const fetchAnswers = () =>
   fetchData(
@@ -75,8 +88,8 @@ export const postUpvoteQuestion = (questionId) =>
     },
     null
   ).then(() => {
-    fetchAnswers();
     fetchQuestions();
+    fetchAnswers();
   });
 
 export const postUserAnswer = () =>
