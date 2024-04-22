@@ -43,3 +43,5 @@ export let questionsAndAnswers = writable([]);
 export const updatedAnswers = writable([]);
 export let course = writable(null);
 export let questionId = writable(0);
+
+export const courses = writable([]);

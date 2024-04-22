@@ -1,15 +1,14 @@
 import { sql } from "./database.js";
 
+// HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
   const data = await request.json();
   let result =
     await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.course_id}) RETURNING id`;
   const questionId = result[0].id;
 
-  // Schedule handleLLMApi to run after this function has returned
   queueMicrotask(() => handleLLMApi(data, questionId));
 
-  // Return the response to the frontend
   return new Response(
     JSON.stringify({
       questionId: questionId,
@@ -21,11 +20,10 @@ export async function getllm(request) {
     }
   );
 }
-
+// WHAT THE LLM API DOES
 async function handleLLMApi(data, questionId) {
   let allAnswers = [];
 
-  // Create an array of promises for the fetch requests
   const fetchPromises = Array(3)
     .fill()
     .map(() =>
@@ -38,10 +36,8 @@ async function handleLLMApi(data, questionId) {
       })
     );
 
-  // Wait for all the fetch requests to complete
   const responses = await Promise.all(fetchPromises);
 
-  // Process the responses
   for (const response of responses) {
     if (response.ok) {
       const jsonData = await response.json();
@@ -53,6 +49,7 @@ async function handleLLMApi(data, questionId) {
     }
   }
 }
+// GETS ALL COURSES
 export async function getCourses() {
   try {
     const courses = await sql`SELECT * FROM Courses;`;
@@ -66,6 +63,8 @@ export async function getCourses() {
     return new Response(JSON.stringify(body), { status: 500 });
   }
 }
+
+// GETS SPECIFIC COURSE
 export async function getCourse(request) {
   try {
     const courseId = new URL(request.url).searchParams.get("courseId");
@@ -80,7 +79,7 @@ export async function getCourse(request) {
     return new Response(JSON.stringify(body), { status: 500 });
   }
 }
-
+// HANDLING THE UPVOTE OF AN ANSWER
 export async function postUpvote(request) {
   try {
     const data = await request.json();
@@ -120,18 +119,17 @@ export async function postUpvote(request) {
     return new Response("Error posting upvote", { status: 500 });
   }
 }
+// HANDLING THE POSTING OF AN ANSWER
 export async function postUserAnswer(request) {
   try {
     const data = await request.json();
 
-    // Insert the new answer into the database
     const result = await sql`
       INSERT INTO Answers (answer, user_id, question_id, last_activity) 
       VALUES (${data.answer}, ${data.user_id}, ${data.question_id}, NOW())
       RETURNING *;
     `;
 
-    // Update the last_activity field of the question
     await sql`
       UPDATE Questions
       SET last_activity = NOW()
@@ -153,37 +151,7 @@ export async function postUserAnswer(request) {
     return new Response("Error posting user answer", { status: 500 });
   }
 }
-export async function getUpvotes(request) {
-  try {
-    // Get answer_id from the query parameters instead of the request body
-    const url = new URL(request.url);
-    const answer_id = url.searchParams.get("answer_id");
-
-    const votes = await sql`SELECT votes FROM Answers WHERE id = ${answer_id}`;
-    if (votes.length === 0) {
-      return new Response(
-        JSON.stringify({ message: "No answer found with this ID" }),
-        {
-          status: 404,
-          headers: new Headers({ "content-type": "application/json" }),
-        }
-      );
-    }
-    return new Response(
-      JSON.stringify({
-        message: "Vote count fetched",
-        votes: votes[0].votes,
-      }),
-      {
-        status: 200,
-        headers: new Headers({ "content-type": "application/json" }),
-      }
-    );
-  } catch (error) {
-    console.error("Error fetching vote count:", error);
-    return new Response("Error fetching vote count", { status: 500 });
-  }
-}
+// HANDLING THE UPVOTE OF A QUESTION
 export async function postUpvoteQuestion(request) {
   try {
     const data = await request.json();
@@ -225,7 +193,7 @@ export async function postUpvoteQuestion(request) {
     return new Response("Error handling votes", { status: 500 });
   }
 }
-
+// GETS QUESTIONS AND ANSWERS
 export async function getQuestionsAndAnswers(request) {
   try {
     const url = new URL(request.url);

@@ -145,8 +145,6 @@ export const fetchAnswers = async () => {
 };
 
 export const postUpvoteQuestion = async (questionId) => {
-  console.log("Question ID:", questionId);
-  console.log("User ID:", get(userUuid));
   const response = await fetch("/api/postUpvoteQuestion", {
     method: "POST",
     headers: {
@@ -160,7 +158,7 @@ export const postUpvoteQuestion = async (questionId) => {
     console.error(message);
     return;
   }
-
+  fetchAnswers();
   fetchQuestions();
 };
 
@@ -230,4 +228,20 @@ export async function fetchCourse() {
   } else {
     throw new Error("Error fetching course");
   }
+}
+
+export async function fetchCourses() {
+  const response = await fetch("/api/getCourses");
+  if (response.ok) {
+    const courses = await response.json();
+    console.log(courses);
+    return courses;
+  } else {
+    throw new Error("Error fetching courses");
+  }
+}
+
+export function selectCourse(id, courseIdStore) {
+  courseIdStore.set(id);
+  window.location.href = `/course`;
 }
