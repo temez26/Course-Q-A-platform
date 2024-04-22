@@ -1,4 +1,9 @@
-import { createResponse, withErrorHandling, parseJson } from "./helper.js";
+import {
+  createResponse,
+  withErrorHandling,
+  parseJson,
+  processAnswers,
+} from "./helper.js";
 import {
   insertQuestion,
   insertAnswer,
@@ -111,7 +116,8 @@ export const postUpvoteQuestion = withErrorHandling(async (request) => {
     "Handling votes successful"
   );
 });
-// GETS QUESTIONS AND ANSWERS
+
+// HANDLING THE GETTING OF QUESTIONS AND ANSWERS
 export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
   const url = new URL(request.url);
   const courseId = url.searchParams.get("courseId");
@@ -134,5 +140,11 @@ export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
     })
   );
 
-  return createResponse(questions, "Fetching questions and answers successful");
+  // Process answers
+  const processedQuestions = await processAnswers(questions);
+
+  return createResponse(
+    processedQuestions,
+    "Fetching questions and answers successful"
+  );
 });

@@ -29,20 +29,9 @@ export const askSomething = async () => {
     body: JSON.stringify(data),
   });
 
-  const responseData = await response.json();
-
   question.set("");
 
-  if (get(coursepage) === 0) {
-    questionsAndAnswers.update((qna) => [
-      {
-        id: responseData.questionId,
-        question: data.question,
-        votes: responseData.votes || 0,
-      },
-      ...qna,
-    ]);
-  }
+  fetchQuestions();
 };
 
 export const fetchQuestions = async () => {
@@ -73,44 +62,12 @@ export const fetchQuestions = async () => {
       .sort((a, b) => b.last_activity - a.last_activity)
   );
 };
-// FOR THE QUESTION ANSWER COMPONENT
-async function processAnswers(jsonData) {
-  jsonData.sort((a, b) => {
-    const aLastActivity = new Date(
-      a.answers[0]?.last_activity || a.last_activity
-    );
-    const bLastActivity = new Date(
-      b.answers[0]?.last_activity || b.last_activity
-    );
-    return bLastActivity - aLastActivity;
-  });
 
-  let updatedQuestionsAndAnswers = await Promise.all(
-    jsonData.map(async (qna) => {
-      const llmAnswers = [];
-      const humanAnswers = [];
-      for (let answer of qna.answers) {
-        console.log("User ID:", answer.user_id);
-        if (answer.user_id === null) {
-          llmAnswers.push(answer);
-        } else {
-          humanAnswers.push(answer);
-        }
-      }
-      console.log("LLM Answers:", llmAnswers);
-      console.log("Human Answers:", humanAnswers);
-      return { ...qna, llmAnswers, humanAnswers: humanAnswers.slice(0, 20) };
-    })
-  );
-
-  return updatedQuestionsAndAnswers;
-}
 export const fetchAnswers = async () => {
   const response = await fetch(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
       specificQuestionId
     )}&page=${get(currentPage)}`,
-
     {
       method: "GET",
       headers: {
@@ -120,10 +77,8 @@ export const fetchAnswers = async () => {
   );
 
   const jsonData = await response.json();
-  let updatedAnswerData = await processAnswers(jsonData);
-  updatedAnswers.set(updatedAnswerData);
+  updatedAnswers.set(jsonData);
 };
-
 export const postUpvoteQuestion = async (questionId) => {
   const response = await fetch("/api/postUpvoteQuestion", {
     method: "POST",
