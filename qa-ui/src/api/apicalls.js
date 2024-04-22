@@ -15,6 +15,16 @@ import {
 } from "../stores/stores.js";
 
 // FOR THE COURSE PAGE COMPONENT
+
+export async function fetchCourse() {
+  const result = await apiCall(
+    `/api/getCourse?courseId=${get(courseId)}`,
+    "GET"
+  );
+
+  course.set(result[0]);
+}
+
 export const askSomething = async () => {
   const data = {
     user_id: get(userUuid),
@@ -50,7 +60,7 @@ export const fetchQuestions = async () => {
       .sort((a, b) => b.last_activity - a.last_activity)
   );
 };
-
+// FOR THE QUESTIONANSWERS PAGE COMPONENT
 export const fetchAnswers = async () => {
   const jsonData = await apiCall(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
@@ -110,14 +120,6 @@ export async function postUpvoteAnswer(answerId) {
     }
   }
   fetchAnswers();
-}
-export async function fetchCourse() {
-  const result = await apiCall(
-    `/api/getCourse?courseId=${get(courseId)}`,
-    "GET"
-  );
-
-  course.set(result[0]);
 }
 
 // FOR THE COURSES COMPONENT
