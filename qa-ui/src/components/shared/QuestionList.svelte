@@ -1,7 +1,7 @@
 <script>
   export let qna = {};
-  import { specificQuestionId } from "../stores/stores.js";
-  import { fetchAnswers, postUpvoteQuestion } from "../api/apicalls.js";
+  import { specificQuestionId } from "../../stores/stores.js";
+  import { fetchAnswers, postUpvoteQuestion } from "../../api/apicalls.js";
 </script>
 
 <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">

@@ -1,9 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { get } from "svelte/store";
-  import Button from "./Button.svelte";
-  import AnswerList from "./AnswerList.svelte";
-  import Pagination from "./Pagination.svelte";
+  import Button from "./shared/Button.svelte";
+  import AnswerList from "./shared/AnswerList.svelte";
+  import Pagination from "./shared/Pagination.svelte";
 
   import {
     answerpage,

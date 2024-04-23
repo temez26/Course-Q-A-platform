@@ -1,7 +1,7 @@
 <script>
   import Button from "./Button.svelte";
   export let answers = [];
-  import { postUpvoteAnswer } from "../api/apicalls.js";
+  import { postUpvoteAnswer } from "../../api/apicalls.js";
 </script>
 
 <ul>
@@ -14,7 +14,7 @@
           </div>
           <p class="text-lg">{answer.answer}</p>
         </div>
-        <Button text="Upvote" on:click={() => postUpvoteAnswer(answer.id)} />
+        <Button text="Upvote" action={() => postUpvoteAnswer(answer.id)} />
       </div>
     </li>
   {/each}

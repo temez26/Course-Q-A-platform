@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
-  import Pagination from "./Pagination.svelte";
-  import QuestionList from "./QuestionList.svelte";
+  import Pagination from "./shared/Pagination.svelte";
+  import QuestionList from "./shared/QuestionList.svelte";
   import {
     question,
     userAnswer,
