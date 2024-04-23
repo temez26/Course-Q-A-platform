@@ -1,7 +1,7 @@
 <script>
   export let text = "";
   export let action = () => {};
-  export let className = "bg-green-700 hover:bg-green-900";
+  export let className = "bg-green-700 hover:bg-green-900 ";
 </script>
 
 <button
