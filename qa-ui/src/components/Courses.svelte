@@ -1,6 +1,11 @@
 <script>
   import { onMount } from "svelte";
-  import { courseId, courses, coursepage, question } from "../stores/stores.js";
+  import {
+    courseId,
+    courses,
+    questionpage,
+    question,
+  } from "../stores/stores.js";
   import { fetchCourses, selectCourse } from "../api/apicalls.js";
 
   onMount(async () => {
@@ -8,14 +13,14 @@
 
     if (window.location.href.includes("courses")) {
       courses.set(fetchedCourses);
-      coursepage.set(0);
+      questionpage.set(0);
       question.set("");
     }
   });
 </script>
 
 <div
-  class="text-5xl font-bold mb-4 bg-gray-900 bg-opacity-80 text-white text-opacity-95 rounded p-8 w-full"
+  class="text-5xl font-bold mb-4 bg-gray-900 bg-opacity-80 text-gray-100 text-opacity-95 rounded p-8 w-full"
 >
   Select any course you want
 </div>

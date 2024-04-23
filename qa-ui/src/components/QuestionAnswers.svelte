@@ -3,7 +3,7 @@
   import { get } from "svelte/store";
 
   import {
-    currentPage,
+    answerpage,
     userAnswer,
     question,
     updatedAnswers,
@@ -12,18 +12,17 @@
   import {
     fetchAnswers,
     postUpvoteAnswer,
-    postUpvoteQuestion,
     postUserAnswer,
   } from "../api/apicalls.js";
 
   export const nextPage1 = () => {
-    $currentPage += 1;
+    $answerpage += 1;
     fetchAnswers();
   };
 
   export const prevPage1 = () => {
-    if ($currentPage > 0) {
-      $currentPage -= 1;
+    if ($answerpage > 0) {
+      $answerpage -= 1;
     }
     fetchAnswers();
   };
@@ -43,8 +42,9 @@
   });
 </script>
 
-<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col">
-  <h1 class="text-4xl font-bold mb-2">Question</h1>
+<div
+  class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col rounded"
+>
   <a href="course/"
     ><button
       class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
@@ -54,18 +54,18 @@
 
   {#each $updatedAnswers as qna, i (i)}
     <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-      <h1 class="text-2xl font-bold mb-4">{qna.question}</h1>
-      <div class="flex items-center mb-2">
-        <div class="bg-blue-500 text-white p-2 rounded-full mr-2">
-          <p class="font-bold">{qna.votes}</p>
-        </div>
-        <button
-          class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
-          on:click={() => postUpvoteQuestion(qna.id)}>Upvote</button
-        >
+      <div class="text-2xl font-bold mb-4">
+        <p class="flex items-center">
+          <span class="mr-2 font-semibold text-gray-100">Question: </span>
+          <span class="text-white">{qna.question}</span>
+        </p>
+        <p class="text-gray-200">
+          Votes: <span class="text-white">{qna.votes}</span>
+        </p>
       </div>
+
       <div class="bg-gray-800 p-4 rounded mt-4">
-        <h3 class="font-bold text-xl mb-2">Post Your Answer:</h3>
+        <h3 class="font-bold text-xl mb-2 text-gray-100">Post Your Answer:</h3>
         <input
           type="text"
           bind:value={$userAnswer}
@@ -83,7 +83,7 @@
         >
       </div>
       <div class="bg-gray-800 p-4 rounded">
-        <h3 class="font-bold text-xl mb-2">LLM Answers:</h3>
+        <h3 class="font-bold text-xl mb-2 text-gray-100">LLM Answers:</h3>
         {#if qna.llmAnswers.length === 0}
           <p>Loading...</p>
         {:else}
@@ -116,7 +116,7 @@
           Previous
         </button>
         <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
-          Page {$currentPage + 1}
+          Page {$answerpage + 1}
         </span>
         <button
           class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
@@ -126,7 +126,7 @@
         </button>
       </div>
       <div class="bg-gray-800 p-4 rounded overflow-y-auto">
-        <h3 class="font-bold text-xl mb-2">Human Answers:</h3>
+        <h3 class="font-bold text-xl mb-2 text-gray-100">Human Answers:</h3>
         <div class="overflow-y-auto max-h-96">
           <ul>
             {#each qna.humanAnswers as answer, j (j)}

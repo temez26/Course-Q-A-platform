@@ -1,4 +1,12 @@
-export async function apiCall(url, method, body = null) {
+export const fetchData = async (url, method, data, store) => {
+  const result = await apiCall(url, method, data);
+  if (store) {
+    store.set(result);
+  }
+  return result;
+};
+
+async function apiCall(url, method, body = null) {
   const options = {
     method: method,
     headers: {
@@ -10,7 +18,7 @@ export async function apiCall(url, method, body = null) {
   }
 
   const response = await fetch(url, options);
-  console.log(response, "for", url, "with", method, "and", body);
+  //console.log(response, "for", url, "with", method, "and", body);
 
   if (!response.ok) {
     console.error(`Error with ${method} request to ${url}`);

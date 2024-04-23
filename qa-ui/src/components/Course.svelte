@@ -1,38 +1,37 @@
 <script>
   import { onMount } from "svelte";
   import {
-    specificQuestionId,
     question,
     userAnswer,
-    coursepage,
-    currentPage,
+    questionpage,
     questionsAndAnswers,
     course,
+    answerpage,
+    specificQuestionId,
   } from "../stores/stores.js";
   import {
     askSomething,
     fetchQuestions,
     postUpvoteQuestion,
     fetchCourse,
+    fetchAnswers,
   } from "../api/apicalls.js";
 
   export const nextPage = () => {
-    $coursepage += 1;
-    fetchQuestions($coursepage);
+    $questionpage += 1;
+    fetchQuestions();
   };
 
   export const prevPage = () => {
-    if ($coursepage > 0) {
-      $coursepage -= 1;
+    if ($questionpage > 0) {
+      $questionpage -= 1;
     }
-    fetchQuestions($coursepage);
+    fetchQuestions();
   };
-  function handleQuestionClick(id) {
-    specificQuestionId.set(id);
-  }
+
   onMount(async () => {
     if (window.location.href.includes("course")) {
-      currentPage.set(0);
+      answerpage.set(0);
       userAnswer.set("");
     }
     fetchCourse();
@@ -62,7 +61,7 @@
 <div
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
 >
-  <h1 class="text-4xl font-bold mb-4">Questions</h1>
+  <h1 class="text-4xl font-bold mb-4 text-gray-100">Questions</h1>
 
   <input
     type="text"
@@ -89,7 +88,7 @@
         Previous
       </button>
       <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
-        Page {$coursepage + 1}
+        Page {$questionpage + 1}
       </span>
       <button
         class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
@@ -102,12 +101,15 @@
     {#each $questionsAndAnswers as qna, i (i)}
       <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
         <div class="flex items-center justify-between">
-          <h2 class="font-bold text-3xl mb-2">
+          <h2 class="font-bold text-3xl mb-2 text-gray-100">
             Question:
             <a
               href={`/question`}
               class="font-bold text-2xl font-serif"
-              on:click={() => handleQuestionClick(qna.id)}
+              on:click={() => {
+                specificQuestionId.set(qna.id);
+                fetchAnswers();
+              }}
             >
               {qna.question}
             </a>

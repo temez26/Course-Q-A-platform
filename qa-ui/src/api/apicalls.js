@@ -1,26 +1,18 @@
 import { get } from "svelte/store";
-import { apiCall } from "./helper.js";
+import { fetchData } from "./helper.js";
 import {
   userUuid,
   courseId,
   question,
-  coursepage,
+  questionpage,
   questionsAndAnswers,
-  currentPage,
   updatedAnswers,
   specificQuestionId,
   userAnswer,
   questionId,
   course,
+  answerpage,
 } from "../stores/stores.js";
-
-const fetchData = async (url, method, data, store) => {
-  const result = await apiCall(url, method, data);
-  if (store) {
-    store.set(result);
-  }
-  return result;
-};
 
 export const fetchCourse = async () => {
   const result = await fetchData(
@@ -48,7 +40,7 @@ export const askSomething = () =>
 export const fetchQuestions = () =>
   fetchData(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
-      coursepage
+      questionpage
     )}`,
     "GET",
     null,
@@ -59,7 +51,7 @@ export const fetchAnswers = () =>
   fetchData(
     `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
       specificQuestionId
-    )}&page=${get(currentPage)}`,
+    )}&page=${get(answerpage)}`,
     "GET",
     null,
     updatedAnswers
