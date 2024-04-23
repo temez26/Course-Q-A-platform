@@ -9,7 +9,7 @@
   <div class="text-2xl font-bold mb-4">
     <p class="flex items-center">
       <span class="mr-2 font-semibold text-gray-100">Question: </span>
-      <span class="text-white">{qna.question}</span>
+      <span class="text-white overflow-auto break-words">{qna.question}</span>
     </p>
     <p class="text-gray-200">
       Votes: <span class="text-white">{qna.votes}</span>

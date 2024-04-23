@@ -53,16 +53,12 @@
   </a>
 </div>
 
-<div
-  class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
->
+<div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 rounded">
   <QuestionInput />
 
   <Pagination {nextPage} {prevPage} page={$questionpage} />
 
-  <div class="h-screen overflow-y-auto">
-    {#each $questionsAndAnswers as qna, i (i)}
-      <QuestionList {qna} />
-    {/each}
-  </div>
+  {#each $questionsAndAnswers as qna, i (i)}
+    <div class="overflow-y-auto"><QuestionList {qna} /></div>
+  {/each}
 </div>
