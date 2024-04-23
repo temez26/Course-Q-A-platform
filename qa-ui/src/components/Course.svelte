@@ -11,11 +11,7 @@
     course,
     answerpage,
   } from "../stores/stores.js";
-  import {
-    askSomething,
-    fetchQuestions,
-    fetchCourse,
-  } from "../api/apicalls.js";
+  import { fetchQuestions, fetchCourse } from "../api/apicalls.js";
 
   const nextPage = () => {
     $questionpage += 1;

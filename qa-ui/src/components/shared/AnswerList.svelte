@@ -6,7 +6,7 @@
 
 <ul>
   {#each answers as answer, j (j)}
-    <li class="mb-2 bg-gray-500 rounded p-2">
+    <li class="mb-2 bg-gray-700 rounded p-2">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
           <p class="text-lg">{answer.answer}</p>

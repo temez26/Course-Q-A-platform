@@ -5,7 +5,7 @@
   import { fetchAnswers, postUpvoteQuestion } from "../../api/apicalls.js";
 </script>
 
-<div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
+<div class="mt-4 bg-gray-700 p-4 rounded-md shadow-lg">
   <div class="flex items-center justify-between">
     <h2 class="font-bold text-3xl mb-2 text-gray-100">
       Question:

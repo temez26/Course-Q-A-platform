@@ -96,7 +96,7 @@ export const postUpvoteAnswer = (answerId) =>
 
 export const fetchCourses = () => fetchData("/api/getCourses", "GET");
 
-export const selectCourse = (id, courseIdStore) => {
-  courseIdStore.set(id);
+export const selectCourse = (id) => {
+  courseId.set(id);
   window.location.href = `/course`;
 };
