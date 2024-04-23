@@ -1,6 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { get } from "svelte/store";
+  import Button from "./Button.svelte";
+  import AnswerList from "./AnswerList.svelte";
+  import Pagination from "./Pagination.svelte";
 
   import {
     answerpage,
@@ -15,12 +18,12 @@
     postUserAnswer,
   } from "../api/apicalls.js";
 
-  export const nextPage1 = () => {
+  const nextPage = () => {
     $answerpage += 1;
     fetchAnswers();
   };
 
-  export const prevPage1 = () => {
+  const prevPage = () => {
     if ($answerpage > 0) {
       $answerpage -= 1;
     }
@@ -45,12 +48,7 @@
 <div
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col rounded"
 >
-  <a href="course/"
-    ><button
-      class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
-      >Back to Course</button
-    ></a
-  >
+  <a href="course/"><Button href="course/" text="Back to Course" /></a>
 
   {#each $updatedAnswers as qna, i (i)}
     <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
@@ -87,67 +85,15 @@
         {#if qna.llmAnswers.length === 0}
           <p>Loading...</p>
         {:else}
-          <ul>
-            {#each qna.llmAnswers as answer, j (j)}
-              <li class="mb-2">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center">
-                    <div class="bg-green-500 text-white p-2 rounded mr-2">
-                      <p class="font-bold">{answer.votes}</p>
-                    </div>
-                    <p class="text-lg">{answer.answer}</p>
-                  </div>
-                  <button
-                    class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
-                    on:click={() => postUpvoteAnswer(answer.id)}>Upvote</button
-                  >
-                </div>
-              </li>
-            {/each}
-          </ul>
+          <AnswerList answers={qna.llmAnswers} {postUpvoteAnswer} />
         {/if}
       </div>
 
-      <div class="bg-gray-800 p-4 rounded">
-        <button
-          class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded mr-2"
-          on:click={prevPage1}
-        >
-          Previous
-        </button>
-        <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
-          Page {$answerpage + 1}
-        </span>
-        <button
-          class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
-          on:click={nextPage1}
-        >
-          Next
-        </button>
-      </div>
+      <Pagination {nextPage} {prevPage} page={$answerpage} />
       <div class="bg-gray-800 p-4 rounded overflow-y-auto">
         <h3 class="font-bold text-xl mb-2 text-gray-100">Human Answers:</h3>
         <div class="overflow-y-auto max-h-96">
-          <ul>
-            {#each qna.humanAnswers as answer, j (j)}
-              <li class="mb-2">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center">
-                    <div class="bg-green-500 text-white p-2 rounded mr-2">
-                      <p class="font-bold">{answer.votes}</p>
-                    </div>
-                    <p class="text-lg">{answer.answer}</p>
-                  </div>
-                  <button
-                    class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
-                    on:click={() => postUpvoteAnswer(answer.id)}
-                  >
-                    Upvote
-                  </button>
-                </div>
-              </li>
-            {/each}
-          </ul>
+          <AnswerList answers={qna.humanAnswers} {postUpvoteAnswer} />
         </div>
       </div>
     </div>

@@ -1,13 +1,14 @@
 <script>
   import { onMount } from "svelte";
+  import Pagination from "./Pagination.svelte";
   import {
     question,
     userAnswer,
     questionpage,
     questionsAndAnswers,
     course,
-    answerpage,
     specificQuestionId,
+    answerpage,
   } from "../stores/stores.js";
   import {
     askSomething,
@@ -17,12 +18,12 @@
     fetchAnswers,
   } from "../api/apicalls.js";
 
-  export const nextPage = () => {
+  const nextPage = () => {
     $questionpage += 1;
     fetchQuestions();
   };
 
-  export const prevPage = () => {
+  const prevPage = () => {
     if ($questionpage > 0) {
       $questionpage -= 1;
     }
@@ -79,54 +80,36 @@
     Ask!
   </button>
 
-  <div class="mt-2 mb-2 overflow-y-auto">
-    <div class="bg-gray-800 p-4 rounded">
-      <button
-        class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded mr-2"
-        on:click={prevPage}
-      >
-        Previous
-      </button>
-      <span class="bg-gray-700 text-white font-bold py-2 px-4 rounded">
-        Page {$questionpage + 1}
-      </span>
-      <button
-        class="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded ml-2"
-        on:click={nextPage}
-      >
-        Next
-      </button>
-    </div>
+  <Pagination {nextPage} {prevPage} page={$questionpage} />
 
-    {#each $questionsAndAnswers as qna, i (i)}
-      <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-        <div class="flex items-center justify-between">
-          <h2 class="font-bold text-3xl mb-2 text-gray-100">
-            Question:
-            <a
-              href={`/question`}
-              class="font-bold text-2xl font-serif"
-              on:click={() => {
-                specificQuestionId.set(qna.id);
-                fetchAnswers();
-              }}
-            >
-              {qna.question}
-            </a>
-          </h2>
-          <div class="flex items-center">
-            <button
-              class="ml-4 px-2 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              on:click={async () => {
-                await postUpvoteQuestion(qna.id);
-              }}
-            >
-              Upvote
-            </button>
-            <span class="ml-2 text-white">{qna.votes}</span>
-          </div>
+  {#each $questionsAndAnswers as qna, i (i)}
+    <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
+      <div class="flex items-center justify-between">
+        <h2 class="font-bold text-3xl mb-2 text-gray-100">
+          Question:
+          <a
+            href={`/question`}
+            class="font-bold text-2xl font-serif"
+            on:click={() => {
+              specificQuestionId.set(qna.id);
+              fetchAnswers();
+            }}
+          >
+            {qna.question}
+          </a>
+        </h2>
+        <div class="flex items-center">
+          <button
+            class="ml-4 px-2 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            on:click={async () => {
+              await postUpvoteQuestion(qna.id);
+            }}
+          >
+            Upvote
+          </button>
+          <span class="ml-2 text-white">{qna.votes}</span>
         </div>
       </div>
-    {/each}
-  </div>
+    </div>
+  {/each}
 </div>
