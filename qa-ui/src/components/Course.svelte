@@ -1,21 +1,19 @@
 <script>
   import { onMount } from "svelte";
   import Pagination from "./Pagination.svelte";
+  import QuestionList from "./QuestionList.svelte";
   import {
     question,
     userAnswer,
     questionpage,
     questionsAndAnswers,
     course,
-    specificQuestionId,
     answerpage,
   } from "../stores/stores.js";
   import {
     askSomething,
     fetchQuestions,
-    postUpvoteQuestion,
     fetchCourse,
-    fetchAnswers,
   } from "../api/apicalls.js";
 
   const nextPage = () => {
@@ -82,34 +80,9 @@
 
   <Pagination {nextPage} {prevPage} page={$questionpage} />
 
-  {#each $questionsAndAnswers as qna, i (i)}
-    <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
-      <div class="flex items-center justify-between">
-        <h2 class="font-bold text-3xl mb-2 text-gray-100">
-          Question:
-          <a
-            href={`/question`}
-            class="font-bold text-2xl font-serif"
-            on:click={() => {
-              specificQuestionId.set(qna.id);
-              fetchAnswers();
-            }}
-          >
-            {qna.question}
-          </a>
-        </h2>
-        <div class="flex items-center">
-          <button
-            class="ml-4 px-2 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            on:click={async () => {
-              await postUpvoteQuestion(qna.id);
-            }}
-          >
-            Upvote
-          </button>
-          <span class="ml-2 text-white">{qna.votes}</span>
-        </div>
-      </div>
-    </div>
-  {/each}
+  <div class="h-screen overflow-y-auto">
+    {#each $questionsAndAnswers as qna, i (i)}
+      <QuestionList {qna} />
+    {/each}
+  </div>
 </div>
