@@ -1,4 +1,5 @@
 <script>
+  import Button from "./shared/Button.svelte";
 </script>
 
 <div class="min-h-screen flex items-center justify-center text-white">
@@ -6,11 +7,10 @@
     <h1 class="text-8xl font-bold text-blue-300">Welcome to Our Courses</h1>
     <p class="text-4xl">Click the button below to view our courses.</p>
     <a href="/courses">
-      <button
-        class="px-12 py-4 m-5 border border-transparent text-3xl font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-      >
-        Courses
-      </button>
+      <Button
+        text="Courses"
+        className="bg-blue-700 hover:bg-blue-900 text-white font-bold py-4 px-8 m-5 text-3xl rounded"
+      />
     </a>
   </div>
 </div>

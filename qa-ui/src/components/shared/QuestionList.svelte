@@ -21,13 +21,15 @@
       </a>
     </h2>
     <div class="flex items-center">
+      <span class="ml-2 text-white bg-green-500 p-1 m-2 rounded"
+        >{qna.votes}</span
+      >
       <Button
         text="Upvote"
         action={async () => {
           await postUpvoteQuestion(qna.id);
         }}
       />
-      <span class="ml-2 text-white">{qna.votes}</span>
     </div>
   </div>
 </div>

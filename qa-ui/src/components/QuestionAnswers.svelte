@@ -1,23 +1,12 @@
 <script>
   import { onMount } from "svelte";
-  import { get } from "svelte/store";
   import Button from "./shared/Button.svelte";
   import AnswerList from "./shared/AnswerList.svelte";
   import Pagination from "./shared/Pagination.svelte";
   import AnswerInput from "./shared/AnswerInput.svelte";
 
-  import {
-    answerpage,
-    userAnswer,
-    question,
-    updatedAnswers,
-    questionId,
-  } from "../stores/stores.js";
-  import {
-    fetchAnswers,
-    postUpvoteAnswer,
-    postUserAnswer,
-  } from "../api/apicalls.js";
+  import { answerpage, question, updatedAnswers } from "../stores/stores.js";
+  import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
     $answerpage += 1;
@@ -38,7 +27,7 @@
     await fetchAnswers();
 
     setTimeout(async () => {
-      const qna = get(updatedAnswers);
+      const qna = $updatedAnswers;
       if (qna.length === 0 || qna[0].answers.length === 0) {
         await fetchAnswers();
       }

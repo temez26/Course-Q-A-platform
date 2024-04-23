@@ -6,15 +6,17 @@
 
 <ul>
   {#each answers as answer, j (j)}
-    <li class="mb-2">
+    <li class="mb-2 bg-gray-500 rounded p-2">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
-          <div class="bg-green-500 text-white p-2 rounded mr-2">
-            <p class="font-bold">{answer.votes}</p>
-          </div>
           <p class="text-lg">{answer.answer}</p>
         </div>
-        <Button text="Upvote" action={() => postUpvoteAnswer(answer.id)} />
+        <div class="flex items-center">
+          <div class="bg-green-600 text-gray-200 p-1 rounded m-2">
+            <p class="font-bold">{answer.votes}</p>
+          </div>
+          <Button text="Upvote" action={() => postUpvoteAnswer(answer.id)} />
+        </div>
       </div>
     </li>
   {/each}

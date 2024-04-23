@@ -2,8 +2,9 @@
   import { onMount } from "svelte";
   import Pagination from "./shared/Pagination.svelte";
   import QuestionList from "./shared/QuestionList.svelte";
+  import Button from "./shared/Button.svelte";
+  import QuestionInput from "./shared/QuestionInput.svelte";
   import {
-    question,
     userAnswer,
     questionpage,
     questionsAndAnswers,
@@ -49,34 +50,17 @@
     <p>Loading...</p>
   {/if}
   <a href="/courses">
-    <button
-      class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-    >
-      Back to Courses
-    </button>
+    <Button
+      text="Back to Courses"
+      className="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 mt-2 rounded"
+    />
   </a>
 </div>
 
 <div
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col min-h-screen max-h-screen"
 >
-  <h1 class="text-4xl font-bold mb-4 text-gray-100">Questions</h1>
-
-  <input
-    type="text"
-    bind:value={$question}
-    class="w-full px-3 py-2 placeholder-gray-500 text-gray-700 rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300"
-    placeholder="Enter your question here"
-  />
-
-  <button
-    class="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-    on:click={async () => {
-      await askSomething();
-    }}
-  >
-    Ask!
-  </button>
+  <QuestionInput />
 
   <Pagination {nextPage} {prevPage} page={$questionpage} />
 
