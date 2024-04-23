@@ -1,4 +1,5 @@
 <script>
+  import Button from "./Button.svelte";
   export let qna = {};
   import { specificQuestionId } from "../../stores/stores.js";
   import { fetchAnswers, postUpvoteQuestion } from "../../api/apicalls.js";
@@ -20,14 +21,12 @@
       </a>
     </h2>
     <div class="flex items-center">
-      <button
-        class="ml-4 px-2 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        on:click={async () => {
+      <Button
+        text="Upvote"
+        action={async () => {
           await postUpvoteQuestion(qna.id);
         }}
-      >
-        Upvote
-      </button>
+      />
       <span class="ml-2 text-white">{qna.votes}</span>
     </div>
   </div>

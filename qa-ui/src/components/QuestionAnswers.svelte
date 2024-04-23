@@ -48,7 +48,12 @@
 <div
   class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 flex flex-col rounded"
 >
-  <a href="course/"><Button href="course/" text="Back to Course" /></a>
+  <a href="course/"
+    ><button
+      class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded"
+      >Back to the Course</button
+    ></a
+  >
 
   {#each $updatedAnswers as qna, i (i)}
     <div class="mt-4 bg-gray-900 p-4 rounded-md shadow-lg">
