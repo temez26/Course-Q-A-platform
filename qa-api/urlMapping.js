@@ -7,78 +7,60 @@ import {
   postUpvoteQuestion,
   postUserAnswer,
 } from "./endpoints.js";
-import {
-  acceptWebSocket,
-  isWebSocketCloseEvent,
-} from "https://deno.land/std/ws/mod.ts";
 
-const handleWebSocket = async (request, fn) => {
-  const { conn, r: bufReader, w: bufWriter, headers } = request;
-  acceptWebSocket({
-    conn,
-    bufReader,
-    bufWriter,
-    headers,
-  }).then(async (sock) => {
-    console.log("socket connected!");
+export const handleWebSocket = async (ws) => {
+  console.log("socket connected!");
+  ws.on("error", function (error) {
+    console.log("WebSocket error:", error);
+  });
+  ws.on("message", async function (message) {
+    console.log("Received message:", message);
+    if (typeof message === "string") {
+      // Assuming the string is a JSON object that contains the type and data for the function
+      const messageObj = JSON.parse(message);
+      console.log("Parsed message:", messageObj);
+      let result;
 
-    try {
-      for await (const ev of sock) {
-        if (typeof ev === "string") {
-          // Assuming the string is a JSON object that contains the parameters for the function
-          const params = JSON.parse(ev);
-
-          const result = await fn(...params);
-          await sock.send(JSON.stringify(result));
-        } else if (isWebSocketCloseEvent(ev)) {
-          const { code, reason } = ev;
-          console.log("closed", code, reason);
-        }
+      switch (messageObj.type) {
+        case "getllm":
+          console.log("Handling getllm");
+          result = await getllm(messageObj.data);
+          break;
+        case "postUpvote":
+          console.log("Handling postUpvote");
+          result = await postUpvote(messageObj.data);
+          break;
+        case "postUserAnswer":
+          console.log("Handling postUserAnswer");
+          result = await postUserAnswer(messageObj.data);
+          break;
+        case "postUpvoteQuestion":
+          console.log("Handling postUpvoteQuestion");
+          result = await postUpvoteQuestion(messageObj.data);
+          break;
+        case "getQuestionsAndAnswers":
+          console.log("Handling getQuestionsAndAnswers");
+          result = await getQuestionsAndAnswers(messageObj.data);
+          break;
+        case "getCourses":
+          console.log("Handling getCourses");
+          result = await getCourses();
+          break;
+        case "getCourse":
+          console.log("Handling getCourse");
+          result = await getCourse(messageObj.courseId);
+          break;
+        default:
+          console.log("Invalid message type:", messageObj.type);
+          result = { message: "Invalid message type" };
       }
-    } catch (err) {
-      console.error(`failed to receive frame: ${err}`);
 
-      if (!sock.isClosed) {
-        await sock.close(1000).catch(console.error);
-      }
+      console.log("Sending result:", result);
+      await ws.send(JSON.stringify(result));
     }
   });
+  console.log("socket closed");
+  ws.on("close", function (code, reason) {
+    console.log("closed", code, reason);
+  });
 };
-
-export const urlMapping = [
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/" }),
-    fn: (request) => handleWebSocket(request, getllm),
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/getCourses" }),
-    fn: (request) => handleWebSocket(request, getCourses),
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/getCourse" }),
-    fn: (request) => handleWebSocket(request, getCourse),
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/postUpvoteQuestion" }),
-    fn: (request) => handleWebSocket(request, postUpvoteQuestion),
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/postUserAnswer" }),
-    fn: (request) => handleWebSocket(request, postUserAnswer),
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/postUpvote" }),
-    fn: (request) => handleWebSocket(request, postUpvote),
-  },
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/getQuestionsAndAnswers" }),
-    fn: (request) => handleWebSocket(request, getQuestionsAndAnswers),
-  },
-];

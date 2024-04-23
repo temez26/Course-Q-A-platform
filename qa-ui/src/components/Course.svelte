@@ -31,7 +31,7 @@
       userAnswer.set("");
     }
     fetchCourse();
-    await fetchQuestions();
+    fetchQuestions();
   });
 </script>
 

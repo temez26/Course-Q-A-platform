@@ -66,8 +66,7 @@ export async function getCourses() {
   }
 }
 // GETS SPECIFIC COURSE
-export const getCourse = withErrorHandling(async (request) => {
-  const courseId = new URL(request.url).searchParams.get("courseId");
+export const getCourse = withErrorHandling(async (courseId) => {
   const course = await fetchCourses(courseId);
   return createResponse(course, "Fetching course successful");
 });
@@ -118,11 +117,10 @@ export const postUpvoteQuestion = withErrorHandling(async (request) => {
 });
 
 // HANDLING THE GETTING OF QUESTIONS AND ANSWERS
-export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
-  const url = new URL(request.url);
-  const courseId = url.searchParams.get("courseId");
-  const questionId = url.searchParams.get("questionId");
-  const currentPage = Number(url.searchParams.get("page")) || 0;
+export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
+  const courseId = messageData.courseId;
+  const questionId = messageData.questionId;
+  const currentPage = Number(messageData.page) || 0;
   const answersPerPage = 20;
   const questionsPerPage = 20;
 

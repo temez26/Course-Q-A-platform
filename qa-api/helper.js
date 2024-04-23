@@ -1,18 +1,15 @@
 // Creating response
-export async function createResponse(data, errorMessage) {
+export function createResponse(data, errorMessage) {
   if (data) {
-    const payload =
-      typeof data === "object"
-        ? JSON.stringify(data)
-        : JSON.stringify({ message: data });
-    return new Response(payload, {
+    return {
       status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      message: typeof data === "object" ? data : { message: data },
+    };
   } else {
-    return new Response(JSON.stringify({ message: errorMessage }), {
+    return {
       status: 500,
-    });
+      message: { message: errorMessage },
+    };
   }
 }
 // Error handling
@@ -21,6 +18,7 @@ export function withErrorHandling(fn) {
     try {
       return await fn(request);
     } catch (error) {
+      console.error(error);
       return createResponse(null, "An error occurred");
     }
   };

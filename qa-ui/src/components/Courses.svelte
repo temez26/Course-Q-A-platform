@@ -5,10 +5,9 @@
   import { fetchCourses } from "../api/apicalls.js";
 
   onMount(async () => {
-    const fetchedCourses = await fetchCourses();
+    fetchCourses();
 
     if (window.location.href.includes("courses")) {
-      courses.set(fetchedCourses);
       questionpage.set(0);
       question.set("");
     }
