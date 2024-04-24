@@ -1,5 +1,4 @@
 import { get } from "svelte/store";
-
 import {
   userUuid,
   courseId,
@@ -13,170 +12,133 @@ import {
   course,
   answerpage,
   courses,
+  answerId,
 } from "../stores/stores.js";
-import QuestionAnswers from "../components/QuestionAnswers.svelte";
 
-// Create a WebSocket connection
 const socket = new WebSocket("ws://localhost:7800/ws/");
 
+const logSocketEvent = (event, message) =>
+  console.log(`WebSocket ${event}: ${message}`);
 socket.onopen = () => {
-  console.log("WebSocket is connected.");
+  console.log("WebSocket is connected:", socket);
 };
+socket.onerror = (error) => logSocketEvent("error", error);
+socket.onclose = (event) => logSocketEvent("is closed with event", event);
 
-socket.onerror = (error) => {
-  console.log(`WebSocket error: ${error}`);
-};
-
-socket.onclose = (event) => {
-  console.log(`WebSocket is closed with event: ${event}`);
-};
 socket.onmessage = (event) => {
   const response = JSON.parse(event.data);
   console.log("response", response);
 
   if (response && response.message) {
-    switch (response.type) {
+    const { type, message } = response;
+    console.log(`${type} fetched:`, message);
+
+    switch (type) {
       case "getCourses":
-        console.log("Courses fetched:", response.message);
-        courses.set(response.message);
+        courses.set(message);
         break;
       case "getCourse":
-        console.log("Course fetched:", response.message);
-        course.set(response.message[0]);
+        course.set(message[0]);
         break;
       case "getllm":
+        console.log("Question asked successfully", message);
         question.set("");
-        fetchQuestions();
+        questionsAndAnswers.set(message);
         break;
       case "getQuestionsAndAnswers":
-        if (response.message.length === 1) {
-          console.log("Answers fetched:", response.message);
-          updatedAnswers.set(response.message);
-        } else if (response.message.length > 1) {
-          console.log("Questions fetched:", response.message);
-          questionsAndAnswers.set(response.message);
-        }
+        response.message.length === 1
+          ? updatedAnswers.set(message)
+          : questionsAndAnswers.set(message);
         break;
       case "postUpvoteQuestion":
-        console.log("Question upvoted:", response.message);
-        fetchQuestions();
+        questionsAndAnswers.set(message);
         break;
       case "postUserAnswer":
-        console.log("User answer posted:", response.message);
-        fetchAnswers();
+        updatedAnswers.set(message);
         break;
       case "postUpvote":
-        fetchAnswers();
-        console.log("Answer upvoted:", response.message);
+        updatedAnswers.set(message);
         break;
       default:
-        console.log("Received a message without a type:", response.message);
+        console.log("Received a message without a type:", message);
     }
   } else {
     console.error("Error fetching data:", response.message);
   }
 };
 
+const createMessage = (type, data = {}) => ({ type, ...data });
+
 const sendSocketMessage = (message) => {
-  if (socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(message));
-  } else {
-    console.log("WebSocket is not open. readyState: " + socket.readyState);
-
-    socket.addEventListener("open", () => {
-      socket.send(JSON.stringify(message));
-    });
-  }
+  const send = () => socket.send(JSON.stringify(message));
+  socket.readyState === WebSocket.OPEN
+    ? send()
+    : socket.addEventListener("open", send);
 };
 
-export const fetchCourses = () => {
-  const message = {
-    type: "getCourses",
-  };
-
-  sendSocketMessage(message);
-};
-
-export const fetchCourse = async () => {
-  const message = {
-    type: "getCourse",
-    courseId: get(courseId),
-  };
-
-  sendSocketMessage(message);
-};
-
-export const askSomething = () => {
-  const message = {
-    type: "getllm",
-    data: {
-      user_id: get(userUuid),
-      question: get(question),
-      course_id: get(courseId),
-    },
-  };
-
-  sendSocketMessage(message);
-};
-
-export const fetchQuestions = () => {
-  const message = {
-    type: "getQuestionsAndAnswers",
-    data: {
-      courseId: get(courseId),
-      page: get(questionpage),
-    },
-  };
-
-  sendSocketMessage(message);
-};
-
-export const fetchAnswers = () => {
-  const message = {
-    type: "getQuestionsAndAnswers",
-    data: {
-      courseId: get(courseId),
-      questionId: get(specificQuestionId),
-      page: get(answerpage),
-    },
-  };
-
-  sendSocketMessage(message);
-};
-
-export const postUpvoteQuestion = (questionId) => {
-  const message = {
-    type: "postUpvoteQuestion",
-    data: {
-      user_id: get(userUuid),
-      question_id: questionId,
-    },
-  };
-
-  sendSocketMessage(message);
-};
-
-export const postUserAnswer = () => {
-  const message = {
-    type: "postUserAnswer",
-    data: {
-      user_id: get(userUuid),
-      answer: get(userAnswer),
-      question_id: get(questionId),
-    },
-  };
-
-  sendSocketMessage(message);
-};
-
-export const postUpvoteAnswer = (answerId) => {
-  const message = {
-    type: "postUpvote",
-    data: {
-      user_id: get(userUuid),
-      answer_id: answerId,
-    },
-  };
-
-  sendSocketMessage(message);
-};
+export const fetchCourses = () =>
+  sendSocketMessage(createMessage("getCourses"));
+export const fetchCourse = () =>
+  sendSocketMessage(createMessage("getCourse", { courseId: get(courseId) }));
+export const askSomething = () =>
+  sendSocketMessage(
+    createMessage("getllm", {
+      data: {
+        user_id: get(userUuid),
+        question: get(question),
+        courseId: get(courseId),
+        page: get(questionpage),
+      },
+    })
+  );
+export const fetchQuestions = () =>
+  sendSocketMessage(
+    createMessage("getQuestionsAndAnswers", {
+      data: { courseId: get(courseId), page: get(questionpage) },
+    })
+  );
+export const fetchAnswers = () =>
+  sendSocketMessage(
+    createMessage("getQuestionsAndAnswers", {
+      data: {
+        courseId: get(courseId),
+        questionId: get(specificQuestionId),
+        page: get(answerpage),
+      },
+    })
+  );
+export const postUpvoteQuestion = (questionId) =>
+  sendSocketMessage(
+    createMessage("postUpvoteQuestion", {
+      data: {
+        user_id: get(userUuid),
+        questionId: questionId,
+        courseId: get(courseId),
+        page: get(questionpage),
+      },
+    })
+  );
+export const postUserAnswer = () =>
+  sendSocketMessage(
+    createMessage("postUserAnswer", {
+      data: {
+        user_id: get(userUuid),
+        answer: get(userAnswer),
+        questionId: get(questionId),
+        courseId: get(courseId),
+        page: get(answerpage),
+      },
+    })
+  );
+export const postUpvoteAnswer = () =>
+  sendSocketMessage(
+    createMessage("postUpvote", {
+      data: {
+        user_id: get(userUuid),
+        questionId: get(specificQuestionId),
+        answer_id: get(answerId),
+        courseId: get(courseId),
+        page: get(answerpage),
+      },
+    })
+  );

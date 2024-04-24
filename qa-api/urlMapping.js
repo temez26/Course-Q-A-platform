@@ -23,19 +23,34 @@ export const handleWebSocket = async (ws) => {
       switch (messageObj.type) {
         case "getllm":
           console.log("Handling getllm");
-          result = await getllm(messageObj.data);
+          await getllm(messageObj.data);
+          result = await getQuestionsAndAnswers(messageObj.data);
           break;
         case "postUpvote":
           console.log("Handling postUpvote");
-          result = await postUpvote(messageObj.data);
+          await postUpvote(messageObj.data);
+          result = await getQuestionsAndAnswers({
+            courseId: messageObj.data.courseId,
+            questionId: messageObj.data.questionId,
+            page: messageObj.data.page,
+          });
           break;
         case "postUserAnswer":
           console.log("Handling postUserAnswer");
-          result = await postUserAnswer(messageObj.data);
+          await postUserAnswer(messageObj.data);
+          result = await getQuestionsAndAnswers({
+            courseId: messageObj.data.courseId,
+            questionId: messageObj.data.questionId,
+            page: messageObj.data.page,
+          });
           break;
         case "postUpvoteQuestion":
           console.log("Handling postUpvoteQuestion");
-          result = await postUpvoteQuestion(messageObj.data);
+          await postUpvoteQuestion(messageObj.data);
+          result = await getQuestionsAndAnswers({
+            courseId: messageObj.data.courseId,
+            page: messageObj.data.page,
+          });
           break;
         case "getQuestionsAndAnswers":
           console.log("Handling getQuestionsAndAnswers");

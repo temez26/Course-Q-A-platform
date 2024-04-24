@@ -1,6 +1,7 @@
 <script>
   import Button from "./Button.svelte";
   export let answers = [];
+  import { answerId } from "../../stores/stores.js";
   import { postUpvoteAnswer } from "../../api/apicalls.js";
 </script>
 
@@ -15,7 +16,13 @@
           <div class="bg-green-600 text-gray-200 p-1 rounded m-2">
             <p class="font-bold">{answer.votes}</p>
           </div>
-          <Button text="Upvote" action={() => postUpvoteAnswer(answer.id)} />
+          <Button
+            text="Upvote"
+            action={() => {
+              answerId.set(answer.id);
+              postUpvoteAnswer();
+            }}
+          />
         </div>
       </div>
     </li>

@@ -36,6 +36,8 @@ export let question = createSyncedStore("question", "");
 export let course = writable(null);
 // clicked id on the course question send it trough api call to get the correct question
 export let questionId = writable(0);
+// clicked id on the course question send it trough api call to get the correct answer
+export let answerId = writable(0);
 // shows the courses as a list
 export const courses = writable([]);
 //for the course page

@@ -29,6 +29,7 @@ export async function getllm(request) {
   queueMicrotask(() => handleLLMApi(data, questionId));
   return createResponse({
     questionId,
+    data,
     message: "Question inserted successfully",
   });
 }
@@ -73,18 +74,18 @@ export const getCourse = withErrorHandling(async (courseId) => {
 // HANDLING THE UPVOTE OF AN ANSWER
 export const postUpvote = withErrorHandling(async (request) => {
   const data = request;
-  const existingVote = await checkExistingVote(data);
+  const existingVote = await checkExistingVote(data.user_id, data.answer_id);
   if (existingVote.length > 0) {
     return createResponse(
-      { votes: await getVoteCount(data.answer_id) },
+      { message: "User already voted for this answer" },
       "User already voted for this answer",
       220
     );
   }
-  await insertUserVote(data);
+  await insertUserVote(data.user_id, data.answer_id);
   await incrementAnswerVotesAndUpdateActivity(data.answer_id);
   return createResponse(
-    { votes: await getVoteCount(data.answer_id) },
+    { message: "Posting upvote successful" },
     "Posting upvote successful"
   );
 });
@@ -92,34 +93,30 @@ export const postUpvote = withErrorHandling(async (request) => {
 // HANDLING THE POSTING OF AN ANSWER
 export const postUserAnswer = withErrorHandling(async (request) => {
   const data = request;
-  await insertUserAnswer(data);
-  await updateQuestionLastActivity(data.question_id);
+  await insertUserAnswer(data.answer, data.user_id, data.questionId);
+  await updateQuestionLastActivity(data.questionId);
   return createResponse("Posting answer successful");
 });
 
 // HANDLING THE UPVOTE OF A QUESTION
 export const postUpvoteQuestion = withErrorHandling(async (request) => {
   const data = request;
-  if ((await checkExistingQuestionVote(data)).length > 0) {
-    return createResponse(
-      { votes: await getQuestionVoteCount(data.question_id) },
-      "user already voted for this question",
-      220
-    );
+  if (
+    (await checkExistingQuestionVote(data.user_id, data.questionId)).length > 0
+  ) {
+    return createResponse({ message: "User already voted for this question" });
   }
-  await insertUserQuestionVote(data);
-  await incrementQuestionVotes(data.question_id);
-  await updateQuestionLastActivity(data.question_id);
-  return createResponse(
-    { votes: await getQuestionVoteCount(data.question_id) },
-    "Handling votes successful"
-  );
+  await insertUserQuestionVote(data.user_id, data.questionId);
+  await incrementQuestionVotes(data.questionId);
+  await updateQuestionLastActivity(data.questionId);
+  return createResponse({ message: "Posting upvote successful" });
 });
 
 // HANDLING THE GETTING OF QUESTIONS AND ANSWERS
 export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
   const courseId = messageData.courseId;
   const questionId = messageData.questionId;
+  console.log("questionId", questionId);
   const currentPage = Number(messageData.page) || 0;
   const answersPerPage = 20;
   const questionsPerPage = 20;
