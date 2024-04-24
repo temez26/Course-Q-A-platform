@@ -1,31 +1,29 @@
-import {
-  createResponse,
-  withErrorHandling,
-  parseJson,
-  processAnswers,
-} from "./helper.js";
+import { createResponse, withErrorHandling, processAnswers } from "./helper.js";
 import {
   insertQuestion,
   insertAnswer,
   fetchCourses,
   checkExistingVote,
-  getVoteCount,
   insertUserVote,
   incrementAnswerVotesAndUpdateActivity,
   insertUserAnswer,
   updateQuestionLastActivity,
   checkExistingQuestionVote,
-  getQuestionVoteCount,
   insertUserQuestionVote,
   incrementQuestionVotes,
   getSpecificQuestion,
   getAllQuestions,
-  getAnswersForQuestion,
+  getllmAnswersForQuestion,
+  getHumanAnswersForQuestion,
 } from "./databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
   const data = request;
-  const [{ id: questionId }] = await insertQuestion(data);
+  const [{ id: questionId }] = await insertQuestion(
+    data.question,
+    data.userUuid,
+    data.courseId
+  );
   queueMicrotask(() => handleLLMApi(data, questionId));
   return createResponse({
     questionId,
@@ -74,7 +72,8 @@ export const getCourse = withErrorHandling(async (courseId) => {
 // HANDLING THE UPVOTE OF AN ANSWER
 export const postUpvote = withErrorHandling(async (request) => {
   const data = request;
-  const existingVote = await checkExistingVote(data.user_id, data.answer_id);
+
+  const existingVote = await checkExistingVote(data.userUuid, data.answerId);
   if (existingVote.length > 0) {
     return createResponse(
       { message: "User already voted for this answer" },
@@ -82,8 +81,8 @@ export const postUpvote = withErrorHandling(async (request) => {
       220
     );
   }
-  await insertUserVote(data.user_id, data.answer_id);
-  await incrementAnswerVotesAndUpdateActivity(data.answer_id);
+  await insertUserVote(data.userUuid, data.answerId);
+  await incrementAnswerVotesAndUpdateActivity(data.answerId);
   return createResponse(
     { message: "Posting upvote successful" },
     "Posting upvote successful"
@@ -93,7 +92,7 @@ export const postUpvote = withErrorHandling(async (request) => {
 // HANDLING THE POSTING OF AN ANSWER
 export const postUserAnswer = withErrorHandling(async (request) => {
   const data = request;
-  await insertUserAnswer(data.answer, data.user_id, data.questionId);
+  await insertUserAnswer(data.userAnswer, data.userUuid, data.questionId);
   await updateQuestionLastActivity(data.questionId);
   return createResponse("Posting answer successful");
 });
@@ -101,12 +100,13 @@ export const postUserAnswer = withErrorHandling(async (request) => {
 // HANDLING THE UPVOTE OF A QUESTION
 export const postUpvoteQuestion = withErrorHandling(async (request) => {
   const data = request;
+
   if (
-    (await checkExistingQuestionVote(data.user_id, data.questionId)).length > 0
+    (await checkExistingQuestionVote(data.userUuid, data.questionId)).length > 0
   ) {
     return createResponse({ message: "User already voted for this question" });
   }
-  await insertUserQuestionVote(data.user_id, data.questionId);
+  await insertUserQuestionVote(data.userUuid, data.questionId);
   await incrementQuestionVotes(data.questionId);
   await updateQuestionLastActivity(data.questionId);
   return createResponse({ message: "Posting upvote successful" });
@@ -116,8 +116,7 @@ export const postUpvoteQuestion = withErrorHandling(async (request) => {
 export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
   const courseId = messageData.courseId;
   const questionId = messageData.questionId;
-  console.log("questionId", questionId);
-  const currentPage = Number(messageData.page) || 0;
+  const currentPage = messageData.page || 0;
   const answersPerPage = 20;
   const questionsPerPage = 20;
 
@@ -127,7 +126,8 @@ export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
 
   await Promise.all(
     questions.map(async (question) => {
-      question.answers = await getAnswersForQuestion(
+      question.llmAnswers = await getllmAnswersForQuestion(question.id);
+      question.humanAnswers = await getHumanAnswersForQuestion(
         question.id,
         answersPerPage,
         currentPage
@@ -135,14 +135,8 @@ export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
     })
   );
 
-  // Process answers
-  const processedQuestions = await processAnswers(questions);
-
   // Sort questions by last_activity
-  processedQuestions.sort((a, b) => b.last_activity - a.last_activity);
+  questions.sort((a, b) => b.last_activity - a.last_activity);
 
-  return createResponse(
-    processedQuestions,
-    "Fetching questions and answers successful"
-  );
+  return createResponse(questions, "Fetching questions and answers successful");
 });

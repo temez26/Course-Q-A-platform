@@ -16,7 +16,8 @@
 <Button
   text="Ask!"
   action={async () => {
-    await askSomething();
+    askSomething();
+    question.set("");
   }}
   className="mt-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
 />

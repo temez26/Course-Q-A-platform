@@ -4,20 +4,21 @@
   import AnswerList from "./shared/AnswerList.svelte";
   import Pagination from "./shared/Pagination.svelte";
   import AnswerInput from "./shared/AnswerInput.svelte";
+  import LlmList from "./shared/LlmList.svelte";
 
-  import { answerpage, question, updatedAnswers } from "../stores/stores.js";
+  import { page, question, updatedAnswers } from "../stores/stores.js";
   import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
-    $answerpage += 1;
+    $page += 1;
     fetchAnswers();
   };
 
   const prevPage = () => {
-    if ($answerpage > 0) {
-      $answerpage -= 1;
+    if ($page > 0) {
+      $page -= 1;
+      fetchAnswers();
     }
-    fetchAnswers();
   };
 
   onMount(async () => {
@@ -29,7 +30,7 @@
     setTimeout(async () => {
       const qna = $updatedAnswers;
       if (qna.length === 0 || qna[0].answers.length === 0) {
-        await fetchAnswers();
+        fetchAnswers();
       }
     }, 2200);
   });
@@ -47,18 +48,19 @@
     <AnswerInput {qna} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">LLM Answers:</h3>
-      {#if qna.llmAnswers.length === 0}
+      {#if Array.isArray(qna.llmAnswers) && qna.llmAnswers.length === 0}
         <p>Loading...</p>
-      {:else}
+      {:else if Array.isArray(qna.llmAnswers)}
         <div class="overflow-y-auto max-h-96">
-          <AnswerList answers={qna.llmAnswers} {postUpvoteAnswer} />
+          <LlmList answers={qna.llmAnswers} {postUpvoteAnswer} />
         </div>
       {/if}
     </div>
 
-    <Pagination {nextPage} {prevPage} page={$answerpage} />
+    <Pagination {nextPage} {prevPage} page={$page} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">Human Answers:</h3>
+
       <div class="overflow-y-auto max-h-96">
         <AnswerList answers={qna.humanAnswers} {postUpvoteAnswer} />
       </div>

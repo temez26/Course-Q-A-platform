@@ -1,11 +1,11 @@
 import { sql } from "./database.js";
 // INSERT QUESTIONS INTO QUESTIONS TABLE AND INSERT LLM ANSWERS TO ANSWERS TABLE
-export async function insertQuestion(data) {
-  return await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${data.question}, ${data.user_id}, ${data.courseId}) RETURNING id`;
+export async function insertQuestion(question, userid, courseId) {
+  return await sql`INSERT INTO Questions (question, user_id, course_id) VALUES (${question}, ${userid}, ${courseId}) RETURNING id`;
 }
 
 export async function insertAnswer(newAnswer, questionId) {
-  return await sql`INSERT INTO Answers (answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
+  return await sql`INSERT INTO Answers (llm_answer, user_id, question_id) VALUES (${newAnswer}, ${null}, ${questionId})`;
 }
 // GET COURSES OR GET SPECIFIC COURSE
 export async function fetchCourses(courseId) {
@@ -84,7 +84,7 @@ export async function getSpecificQuestion(courseId, questionId) {
 // FOR GET QUESTIONS AND ANSWERS: Gets all questions for a specific course, with pagination
 export async function getAllQuestions(courseId, questionsPerPage, currentPage) {
   const questions = await sql`
-      SELECT * FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT ${questionsPerPage} OFFSET ${
+      SELECT id, question, last_activity, votes FROM Questions WHERE course_id = ${courseId} ORDER BY last_activity DESC LIMIT ${questionsPerPage} OFFSET ${
     currentPage * questionsPerPage
   };
     `;
@@ -92,18 +92,24 @@ export async function getAllQuestions(courseId, questionsPerPage, currentPage) {
 }
 
 // FOR GET QUESTIONS AND ANSWERS: Gets all answers for a specific question, with pagination
-export async function getAnswersForQuestion(
+// FOR GET QUESTIONS AND ANSWERS: Gets all LLM answers for a specific question
+export async function getllmAnswersForQuestion(questionId) {
+  const answers = await sql`
+      SELECT id, llm_answer, votes, last_activity FROM Answers WHERE question_id = ${questionId} AND user_id IS NULL ORDER BY last_activity DESC LIMIT 3;
+    `;
+  return answers;
+}
+
+// FOR GET QUESTIONS AND ANSWERS: Gets all answers for a specific question, with pagination
+export async function getHumanAnswersForQuestion(
   questionId,
   answersPerPage,
   currentPage
 ) {
   const answers = await sql`
-      (SELECT * FROM Answers WHERE question_id = ${questionId} AND user_id IS NULL)
-      UNION
-      (SELECT * FROM Answers WHERE question_id = ${questionId} AND user_id IS NOT NULL ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${
+      SELECT id, answer, votes, last_activity FROM Answers WHERE question_id = ${questionId} AND user_id IS NOT NULL ORDER BY last_activity DESC LIMIT ${answersPerPage} OFFSET ${
     currentPage * answersPerPage
-  })
-      ORDER BY last_activity DESC;
+  };
     `;
   return answers;
 }

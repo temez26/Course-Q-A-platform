@@ -56,6 +56,7 @@ export const handleWebSocket = async (ws) => {
           console.log("Handling getQuestionsAndAnswers");
           result = await getQuestionsAndAnswers(messageObj.data);
           break;
+
         case "getCourses":
           console.log("Handling getCourses");
           result = await getCourses();

@@ -24,12 +24,6 @@ export function withErrorHandling(fn) {
   };
 }
 
-// Parse json data
-export async function parseJson(request) {
-  const data = await request.json();
-  return data;
-}
-
 // Filtering the answers to llm and human answers from function questionsAndAnswers
 export async function processAnswers(jsonData) {
   jsonData.sort((a, b) => {

@@ -6,28 +6,26 @@
   import QuestionInput from "./shared/QuestionInput.svelte";
   import {
     userAnswer,
-    questionpage,
     questionsAndAnswers,
     course,
-    answerpage,
+    page,
   } from "../stores/stores.js";
   import { fetchQuestions, fetchCourse } from "../api/apicalls.js";
 
   const nextPage = () => {
-    $questionpage += 1;
+    $page += 1;
     fetchQuestions();
   };
 
   const prevPage = () => {
-    if ($questionpage > 0) {
-      $questionpage -= 1;
+    if ($page > 0) {
+      $page -= 1;
+      fetchQuestions();
     }
-    fetchQuestions();
   };
 
   onMount(async () => {
     if (window.location.href.includes("course")) {
-      answerpage.set(0);
       userAnswer.set("");
     }
     fetchCourse();
@@ -56,7 +54,7 @@
 <div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 rounded">
   <QuestionInput />
 
-  <Pagination {nextPage} {prevPage} page={$questionpage} />
+  <Pagination {nextPage} {prevPage} page={$page} />
 
   {#each $questionsAndAnswers as qna, i (i)}
     <div class="overflow-y-auto"><QuestionList {qna} /></div>

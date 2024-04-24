@@ -1,7 +1,7 @@
 <script>
   import Button from "./Button.svelte";
   export let qna = {};
-  import { specificQuestionId } from "../../stores/stores.js";
+  import { questionId } from "../../stores/stores.js";
   import { fetchAnswers, postUpvoteQuestion } from "../../api/apicalls.js";
 </script>
 
@@ -13,7 +13,7 @@
         href={`/question`}
         class="font-bold text-2xl"
         on:click={() => {
-          specificQuestionId.set(qna.id);
+          questionId.set(qna.id);
           fetchAnswers();
         }}
       >
@@ -26,8 +26,10 @@
       >
       <Button
         text="Upvote"
-        action={async () => {
-          await postUpvoteQuestion(qna.id);
+        action={() => {
+          questionId.set(qna.id);
+
+          postUpvoteQuestion();
         }}
       />
     </div>
