@@ -26,6 +26,9 @@ export const questionId = createSyncedStore("questionId", 0);
 // stores the number of the answers list page number
 export let page = createSyncedStore("page", 0);
 
+// stores the number of the answers list page number
+export let answerpage = createSyncedStore("answerpage", 0);
+
 //user answer input
 export let userAnswer = createSyncedStore("userAnswer", "");
 //user question input

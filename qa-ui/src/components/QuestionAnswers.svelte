@@ -1,22 +1,27 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import Button from "./shared/Button.svelte";
   import AnswerList from "./shared/AnswerList.svelte";
   import Pagination from "./shared/Pagination.svelte";
   import AnswerInput from "./shared/AnswerInput.svelte";
   import LlmList from "./shared/LlmList.svelte";
 
-  import { page, question, updatedAnswers } from "../stores/stores.js";
+  import {
+    page,
+    question,
+    updatedAnswers,
+    answerpage,
+  } from "../stores/stores.js";
   import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
-    $page += 1;
+    $answerpage += 1;
     fetchAnswers();
   };
 
   const prevPage = () => {
-    if ($page > 0) {
-      $page -= 1;
+    if ($answerpage > 0) {
+      $answerpage -= 1;
       fetchAnswers();
     }
   };
@@ -25,12 +30,16 @@
     if (window.location.href.includes("question")) {
       question.set("");
     }
+
     fetchAnswers();
 
     setTimeout(async () => {
-      const qna = $updatedAnswers;
-      if (qna.length === 0 || qna[0].answers.length === 0) {
-        fetchAnswers();
+      if ($updatedAnswers) {
+        // Check if $updatedAnswers is defined
+        const qna = $updatedAnswers;
+        if (qna.length === 0 || qna[0].answers.length === 0) {
+          fetchAnswers();
+        }
       }
     }, 2200);
   });
@@ -57,7 +66,7 @@
       {/if}
     </div>
 
-    <Pagination {nextPage} {prevPage} page={$page} />
+    <Pagination {nextPage} {prevPage} page={$answerpage} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">Human Answers:</h3>
 

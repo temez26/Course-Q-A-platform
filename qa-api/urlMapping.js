@@ -32,7 +32,7 @@ export const handleWebSocket = async (ws) => {
           result = await getQuestionsAndAnswers({
             courseId: messageObj.data.courseId,
             questionId: messageObj.data.questionId,
-            page: messageObj.data.page,
+            page: messageObj.data.answerpage,
           });
           break;
         case "postUserAnswer":
@@ -41,7 +41,7 @@ export const handleWebSocket = async (ws) => {
           result = await getQuestionsAndAnswers({
             courseId: messageObj.data.courseId,
             questionId: messageObj.data.questionId,
-            page: messageObj.data.page,
+            page: messageObj.data.answerpage,
           });
           break;
         case "postUpvoteQuestion":

@@ -11,6 +11,7 @@ import {
   course,
   courses,
   answerId,
+  answerpage,
 } from "../stores/stores.js";
 
 const stores = {
@@ -21,6 +22,7 @@ const stores = {
   userAnswer,
   questionId,
   answerId,
+  answerpage,
 };
 console.log(stores);
 const socket = new WebSocket("ws://localhost:7800/ws/");
@@ -93,7 +95,10 @@ export const askSomething = () =>
 export const fetchQuestions = () =>
   send("getQuestionsAndAnswers", getData("courseId", "page"));
 export const fetchAnswers = () =>
-  send("getQuestionsAndAnswers", getData("courseId", "questionId", "page"));
+  send(
+    "getQuestionsAndAnswers",
+    getData("courseId", "questionId", "answerpage")
+  );
 export const postUpvoteQuestion = () =>
   send(
     "postUpvoteQuestion",
@@ -102,10 +107,10 @@ export const postUpvoteQuestion = () =>
 export const postUserAnswer = () =>
   send(
     "postUserAnswer",
-    getData("userUuid", "userAnswer", "questionId", "courseId", "page")
+    getData("userUuid", "userAnswer", "questionId", "courseId", "answerpage")
   );
 export const postUpvoteAnswer = () =>
   send(
     "postUpvote",
-    getData("userUuid", "questionId", "answerId", "courseId", "page")
+    getData("userUuid", "questionId", "answerId", "courseId", "answerpage")
   );

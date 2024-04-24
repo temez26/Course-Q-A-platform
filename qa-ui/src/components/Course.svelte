@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import Pagination from "./shared/Pagination.svelte";
   import QuestionList from "./shared/QuestionList.svelte";
   import Button from "./shared/Button.svelte";
@@ -9,6 +9,7 @@
     questionsAndAnswers,
     course,
     page,
+    answerpage,
   } from "../stores/stores.js";
   import { fetchQuestions, fetchCourse } from "../api/apicalls.js";
 
@@ -27,7 +28,9 @@
   onMount(async () => {
     if (window.location.href.includes("course")) {
       userAnswer.set("");
+      answerpage.set(0);
     }
+
     fetchCourse();
     fetchQuestions();
   });

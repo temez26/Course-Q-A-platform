@@ -1,13 +1,14 @@
 <script>
   import { onMount } from "svelte";
   import CoursesList from "./shared/CoursesList.svelte";
-  import { courses, question } from "../stores/stores.js";
+  import { courses, question, page } from "../stores/stores.js";
   import { fetchCourses } from "../api/apicalls.js";
 
   onMount(async () => {
     fetchCourses();
 
     if (window.location.href.includes("courses")) {
+      page.set(0);
       question.set("");
     }
   });

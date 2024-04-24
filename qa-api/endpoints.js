@@ -116,7 +116,7 @@ export const postUpvoteQuestion = withErrorHandling(async (request) => {
 export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
   const courseId = messageData.courseId;
   const questionId = messageData.questionId;
-  const currentPage = messageData.page || 0;
+  const currentPage = messageData.page || messageData.answerpage || 0;
   const answersPerPage = 20;
   const questionsPerPage = 20;
 
