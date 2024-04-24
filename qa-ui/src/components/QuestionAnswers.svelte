@@ -1,11 +1,17 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import Button from "./shared/Button.svelte";
   import AnswerList from "./shared/AnswerList.svelte";
   import Pagination from "./shared/Pagination.svelte";
   import AnswerInput from "./shared/AnswerInput.svelte";
+  import LlmList from "./shared/LlmList.svelte";
 
-  import { answerpage, question, updatedAnswers } from "../stores/stores.js";
+  import {
+    page,
+    question,
+    updatedAnswers,
+    answerpage,
+  } from "../stores/stores.js";
   import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
@@ -16,20 +22,24 @@
   const prevPage = () => {
     if ($answerpage > 0) {
       $answerpage -= 1;
+      fetchAnswers();
     }
-    fetchAnswers();
   };
 
   onMount(async () => {
     if (window.location.href.includes("question")) {
       question.set("");
     }
-    await fetchAnswers();
+
+    fetchAnswers();
 
     setTimeout(async () => {
-      const qna = $updatedAnswers;
-      if (qna.length === 0 || qna[0].answers.length === 0) {
-        await fetchAnswers();
+      if ($updatedAnswers) {
+        // Check if $updatedAnswers is defined
+        const qna = $updatedAnswers;
+        if (qna.length === 0 || qna[0].answers.length === 0) {
+          fetchAnswers();
+        }
       }
     }, 2200);
   });
@@ -47,11 +57,11 @@
     <AnswerInput {qna} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">LLM Answers:</h3>
-      {#if qna.llmAnswers.length === 0}
+      {#if Array.isArray(qna.llmAnswers) && qna.llmAnswers.length === 0}
         <p>Loading...</p>
-      {:else}
+      {:else if Array.isArray(qna.llmAnswers)}
         <div class="overflow-y-auto max-h-96">
-          <AnswerList answers={qna.llmAnswers} {postUpvoteAnswer} />
+          <LlmList answers={qna.llmAnswers} {postUpvoteAnswer} />
         </div>
       {/if}
     </div>
@@ -59,6 +69,7 @@
     <Pagination {nextPage} {prevPage} page={$answerpage} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">Human Answers:</h3>
+
       <div class="overflow-y-auto max-h-96">
         <AnswerList answers={qna.humanAnswers} {postUpvoteAnswer} />
       </div>

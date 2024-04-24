@@ -1,102 +1,116 @@
 import { get } from "svelte/store";
-import { fetchData } from "./helper.js";
 import {
   userUuid,
   courseId,
   question,
-  questionpage,
+  page,
   questionsAndAnswers,
   updatedAnswers,
-  specificQuestionId,
   userAnswer,
   questionId,
   course,
+  courses,
+  answerId,
   answerpage,
 } from "../stores/stores.js";
 
-export const fetchCourse = async () => {
-  const result = await fetchData(
-    `/api/getCourse?courseId=${get(courseId)}`,
-    "GET"
-  );
-  course.set(result[0]);
+const stores = {
+  userUuid,
+  question,
+  courseId,
+  page,
+  userAnswer,
+  questionId,
+  answerId,
+  answerpage,
+};
+console.log(stores);
+const socket = new WebSocket("ws://localhost:7800/ws/");
+
+const logSocketEvent = (event, message) =>
+  console.log(`WebSocket ${event}: ${message}`);
+socket.onopen = () => logSocketEvent("is connected", socket);
+socket.onerror = (error) => logSocketEvent("error", error);
+socket.onclose = (event) => logSocketEvent("is closed with event", event);
+
+const setResponse = (type, message) => {
+  const setters = {
+    getCourses: () => courses.set(message),
+    getCourse: () => course.set(message[0]),
+    getllm: () => {
+      questionsAndAnswers.set(message);
+    },
+    getQuestionsAndAnswers: () =>
+      message.length === 1
+        ? updatedAnswers.set(message)
+        : questionsAndAnswers.set(message),
+    postUpvoteQuestion: () => questionsAndAnswers.set(message),
+    postUserAnswer: () => updatedAnswers.set(message),
+    postUpvote: () => updatedAnswers.set(message),
+  };
+
+  return setters[type]
+    ? setters[type]()
+    : console.log("Received a message without a type:", message);
 };
 
+socket.onmessage = (event) => {
+  const response = JSON.parse(event.data);
+  logSocketEvent("response", response);
+
+  if (response && response.message) {
+    const { type, message } = response;
+    logSocketEvent(`${type} fetched`, message);
+    setResponse(type, message);
+  } else {
+    console.error("Error fetching data:", response.message);
+  }
+};
+
+const createMessage = (type, data = {}) => ({ type, ...data });
+
+const sendSocketMessage = (message) => {
+  const send = () => socket.send(JSON.stringify(message));
+  socket.readyState === WebSocket.OPEN
+    ? send()
+    : socket.addEventListener("open", send);
+};
+
+const send = (type, data = {}) =>
+  sendSocketMessage(createMessage(type, { data }));
+
+const getData = (...keys) => {
+  let data = {};
+
+  keys.forEach((key) => {
+    data[key] = get(stores[key]);
+  });
+  console.log(data);
+  return data;
+};
+export const fetchCourses = () => send("getCourses");
+export const fetchCourse = () => send("getCourse", getData("courseId"));
 export const askSomething = () =>
-  fetchData(
-    "/api/",
-    "POST",
-    {
-      user_id: get(userUuid),
-      question: get(question),
-      course_id: get(courseId),
-    },
-    null
-  ).then(() => {
-    question.set("");
-    fetchQuestions();
-  });
-
+  send("getllm", getData("userUuid", "question", "courseId", "page"));
 export const fetchQuestions = () =>
-  fetchData(
-    `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&page=${get(
-      questionpage
-    )}`,
-    "GET",
-    null,
-    questionsAndAnswers
-  );
-
+  send("getQuestionsAndAnswers", getData("courseId", "page"));
 export const fetchAnswers = () =>
-  fetchData(
-    `/api/getQuestionsAndAnswers?courseId=${get(courseId)}&questionId=${get(
-      specificQuestionId
-    )}&page=${get(answerpage)}`,
-    "GET",
-    null,
-    updatedAnswers
+  send(
+    "getQuestionsAndAnswers",
+    getData("courseId", "questionId", "answerpage")
   );
-
-export const postUpvoteQuestion = (questionId) =>
-  fetchData(
-    "/api/postUpvoteQuestion",
-    "POST",
-    {
-      user_id: get(userUuid),
-      question_id: questionId,
-    },
-    null
-  ).then(() => {
-    fetchQuestions();
-    fetchAnswers();
-  });
-
+export const postUpvoteQuestion = () =>
+  send(
+    "postUpvoteQuestion",
+    getData("userUuid", "courseId", "page", "questionId")
+  );
 export const postUserAnswer = () =>
-  fetchData(
-    "/api/postUserAnswer",
-    "POST",
-    {
-      user_id: get(userUuid),
-      answer: get(userAnswer),
-      question_id: get(questionId),
-    },
-    null
-  ).then(fetchAnswers);
-
-export const postUpvoteAnswer = (answerId) =>
-  fetchData(
-    "/api/postUpvote",
-    "POST",
-    {
-      user_id: get(userUuid),
-      answer_id: answerId,
-    },
-    null
-  ).then(fetchAnswers);
-
-export const fetchCourses = () => fetchData("/api/getCourses", "GET");
-
-export const selectCourse = (id) => {
-  courseId.set(id);
-  window.location.href = `/course`;
-};
+  send(
+    "postUserAnswer",
+    getData("userUuid", "userAnswer", "questionId", "courseId", "answerpage")
+  );
+export const postUpvoteAnswer = () =>
+  send(
+    "postUpvote",
+    getData("userUuid", "questionId", "answerId", "courseId", "answerpage")
+  );

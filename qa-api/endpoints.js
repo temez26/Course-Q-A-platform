@@ -1,34 +1,33 @@
-import {
-  createResponse,
-  withErrorHandling,
-  parseJson,
-  processAnswers,
-} from "./helper.js";
+import { createResponse, withErrorHandling, processAnswers } from "./helper.js";
 import {
   insertQuestion,
   insertAnswer,
   fetchCourses,
   checkExistingVote,
-  getVoteCount,
   insertUserVote,
   incrementAnswerVotesAndUpdateActivity,
   insertUserAnswer,
   updateQuestionLastActivity,
   checkExistingQuestionVote,
-  getQuestionVoteCount,
   insertUserQuestionVote,
   incrementQuestionVotes,
   getSpecificQuestion,
   getAllQuestions,
-  getAnswersForQuestion,
+  getllmAnswersForQuestion,
+  getHumanAnswersForQuestion,
 } from "./databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
-  const data = await parseJson(request);
-  const [{ id: questionId }] = await insertQuestion(data);
+  const data = request;
+  const [{ id: questionId }] = await insertQuestion(
+    data.question,
+    data.userUuid,
+    data.courseId
+  );
   queueMicrotask(() => handleLLMApi(data, questionId));
   return createResponse({
     questionId,
+    data,
     message: "Question inserted successfully",
   });
 }
@@ -66,63 +65,58 @@ export async function getCourses() {
   }
 }
 // GETS SPECIFIC COURSE
-export const getCourse = withErrorHandling(async (request) => {
-  const courseId = new URL(request.url).searchParams.get("courseId");
+export const getCourse = withErrorHandling(async (courseId) => {
   const course = await fetchCourses(courseId);
   return createResponse(course, "Fetching course successful");
 });
 // HANDLING THE UPVOTE OF AN ANSWER
 export const postUpvote = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
-  const existingVote = await checkExistingVote(data);
+  const data = request;
+
+  const existingVote = await checkExistingVote(data.userUuid, data.answerId);
   if (existingVote.length > 0) {
     return createResponse(
-      { votes: await getVoteCount(data.answer_id) },
+      { message: "User already voted for this answer" },
       "User already voted for this answer",
       220
     );
   }
-  await insertUserVote(data);
-  await incrementAnswerVotesAndUpdateActivity(data.answer_id);
+  await insertUserVote(data.userUuid, data.answerId);
+  await incrementAnswerVotesAndUpdateActivity(data.answerId);
   return createResponse(
-    { votes: await getVoteCount(data.answer_id) },
+    { message: "Posting upvote successful" },
     "Posting upvote successful"
   );
 });
 
 // HANDLING THE POSTING OF AN ANSWER
 export const postUserAnswer = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
-  await insertUserAnswer(data);
-  await updateQuestionLastActivity(data.question_id);
+  const data = request;
+  await insertUserAnswer(data.userAnswer, data.userUuid, data.questionId);
+  await updateQuestionLastActivity(data.questionId);
   return createResponse("Posting answer successful");
 });
 
 // HANDLING THE UPVOTE OF A QUESTION
 export const postUpvoteQuestion = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
-  if ((await checkExistingQuestionVote(data)).length > 0) {
-    return createResponse(
-      { votes: await getQuestionVoteCount(data.question_id) },
-      "user already voted for this question",
-      220
-    );
+  const data = request;
+
+  if (
+    (await checkExistingQuestionVote(data.userUuid, data.questionId)).length > 0
+  ) {
+    return createResponse({ message: "User already voted for this question" });
   }
-  await insertUserQuestionVote(data);
-  await incrementQuestionVotes(data.question_id);
-  await updateQuestionLastActivity(data.question_id);
-  return createResponse(
-    { votes: await getQuestionVoteCount(data.question_id) },
-    "Handling votes successful"
-  );
+  await insertUserQuestionVote(data.userUuid, data.questionId);
+  await incrementQuestionVotes(data.questionId);
+  await updateQuestionLastActivity(data.questionId);
+  return createResponse({ message: "Posting upvote successful" });
 });
 
 // HANDLING THE GETTING OF QUESTIONS AND ANSWERS
-export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
-  const url = new URL(request.url);
-  const courseId = url.searchParams.get("courseId");
-  const questionId = url.searchParams.get("questionId");
-  const currentPage = Number(url.searchParams.get("page")) || 0;
+export const getQuestionsAndAnswers = withErrorHandling(async (messageData) => {
+  const courseId = messageData.courseId;
+  const questionId = messageData.questionId;
+  const currentPage = messageData.page || messageData.answerpage || 0;
   const answersPerPage = 20;
   const questionsPerPage = 20;
 
@@ -132,7 +126,8 @@ export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
 
   await Promise.all(
     questions.map(async (question) => {
-      question.answers = await getAnswersForQuestion(
+      question.llmAnswers = await getllmAnswersForQuestion(question.id);
+      question.humanAnswers = await getHumanAnswersForQuestion(
         question.id,
         answersPerPage,
         currentPage
@@ -140,14 +135,8 @@ export const getQuestionsAndAnswers = withErrorHandling(async (request) => {
     })
   );
 
-  // Process answers
-  const processedQuestions = await processAnswers(questions);
-
   // Sort questions by last_activity
-  processedQuestions.sort((a, b) => b.last_activity - a.last_activity);
+  questions.sort((a, b) => b.last_activity - a.last_activity);
 
-  return createResponse(
-    processedQuestions,
-    "Fetching questions and answers successful"
-  );
+  return createResponse(questions, "Fetching questions and answers successful");
 });

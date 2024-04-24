@@ -19,6 +19,7 @@ CREATE TABLE Answers (
     user_id UUID,
     question_id INTEGER,
     answer TEXT,
+    llm_answer TEXT,
     votes INTEGER DEFAULT 0,
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(question_id) REFERENCES Questions(id)
