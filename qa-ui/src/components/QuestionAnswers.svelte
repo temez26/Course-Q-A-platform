@@ -24,7 +24,7 @@
     if (window.location.href.includes("question")) {
       question.set("");
     }
-    await fetchAnswers();
+    fetchAnswers();
 
     setTimeout(async () => {
       const qna = $updatedAnswers;

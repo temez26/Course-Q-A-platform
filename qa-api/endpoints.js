@@ -24,7 +24,7 @@ import {
 } from "./databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
-  const data = await parseJson(request);
+  const data = request;
   const [{ id: questionId }] = await insertQuestion(data);
   queueMicrotask(() => handleLLMApi(data, questionId));
   return createResponse({
@@ -72,7 +72,7 @@ export const getCourse = withErrorHandling(async (courseId) => {
 });
 // HANDLING THE UPVOTE OF AN ANSWER
 export const postUpvote = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
+  const data = request;
   const existingVote = await checkExistingVote(data);
   if (existingVote.length > 0) {
     return createResponse(
@@ -91,7 +91,7 @@ export const postUpvote = withErrorHandling(async (request) => {
 
 // HANDLING THE POSTING OF AN ANSWER
 export const postUserAnswer = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
+  const data = request;
   await insertUserAnswer(data);
   await updateQuestionLastActivity(data.question_id);
   return createResponse("Posting answer successful");
@@ -99,7 +99,7 @@ export const postUserAnswer = withErrorHandling(async (request) => {
 
 // HANDLING THE UPVOTE OF A QUESTION
 export const postUpvoteQuestion = withErrorHandling(async (request) => {
-  const data = await parseJson(request);
+  const data = request;
   if ((await checkExistingQuestionVote(data)).length > 0) {
     return createResponse(
       { votes: await getQuestionVoteCount(data.question_id) },

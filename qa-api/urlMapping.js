@@ -16,7 +16,6 @@ export const handleWebSocket = async (ws) => {
   ws.on("message", async function (message) {
     console.log("Received message:", message);
     if (typeof message === "string") {
-      // Assuming the string is a JSON object that contains the type and data for the function
       const messageObj = JSON.parse(message);
       console.log("Parsed message:", messageObj);
       let result;
@@ -54,9 +53,12 @@ export const handleWebSocket = async (ws) => {
           console.log("Invalid message type:", messageObj.type);
           result = { message: "Invalid message type" };
       }
-
-      console.log("Sending result:", result);
-      await ws.send(JSON.stringify(result));
+      const resultWithMessageType = {
+        ...result,
+        type: messageObj.type,
+      };
+      console.log("Sending result:", resultWithMessageType);
+      await ws.send(JSON.stringify(resultWithMessageType));
     }
   });
   console.log("socket closed");

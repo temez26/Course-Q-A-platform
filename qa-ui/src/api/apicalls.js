@@ -14,6 +14,7 @@ import {
   answerpage,
   courses,
 } from "../stores/stores.js";
+import QuestionAnswers from "../components/QuestionAnswers.svelte";
 
 // Create a WebSocket connection
 const socket = new WebSocket("ws://localhost:7800/ws/");
@@ -34,12 +35,42 @@ socket.onmessage = (event) => {
   console.log("response", response);
 
   if (response && response.message) {
-    if (response.message.length === 1) {
-      console.log("Course fetched:", response.message);
-      course.set(response.message[0]);
-    } else if (response.message.length > 1) {
-      console.log("Questions fetched:", response.message);
-      questionsAndAnswers.set(response.message);
+    switch (response.type) {
+      case "getCourses":
+        console.log("Courses fetched:", response.message);
+        courses.set(response.message);
+        break;
+      case "getCourse":
+        console.log("Course fetched:", response.message);
+        course.set(response.message[0]);
+        break;
+      case "getllm":
+        question.set("");
+        fetchQuestions();
+        break;
+      case "getQuestionsAndAnswers":
+        if (response.message.length === 1) {
+          console.log("Answers fetched:", response.message);
+          updatedAnswers.set(response.message);
+        } else if (response.message.length > 1) {
+          console.log("Questions fetched:", response.message);
+          questionsAndAnswers.set(response.message);
+        }
+        break;
+      case "postUpvoteQuestion":
+        console.log("Question upvoted:", response.message);
+        fetchQuestions();
+        break;
+      case "postUserAnswer":
+        console.log("User answer posted:", response.message);
+        fetchAnswers();
+        break;
+      case "postUpvote":
+        fetchAnswers();
+        console.log("Answer upvoted:", response.message);
+        break;
+      default:
+        console.log("Received a message without a type:", response.message);
     }
   } else {
     console.error("Error fetching data:", response.message);
@@ -64,13 +95,8 @@ export const fetchCourses = () => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = (event) => {
-    const response = JSON.parse(event.data);
-    console.log("fetchCourses", response.message);
-    courses.set(response.message);
-  };
 };
+
 export const fetchCourse = async () => {
   const message = {
     type: "getCourse",
@@ -82,7 +108,7 @@ export const fetchCourse = async () => {
 
 export const askSomething = () => {
   const message = {
-    type: "askSomething",
+    type: "getllm",
     data: {
       user_id: get(userUuid),
       question: get(question),
@@ -91,11 +117,6 @@ export const askSomething = () => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = () => {
-    question.set("");
-    fetchQuestions();
-  };
 };
 
 export const fetchQuestions = () => {
@@ -121,11 +142,6 @@ export const fetchAnswers = () => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    updatedAnswers(data);
-  };
 };
 
 export const postUpvoteQuestion = (questionId) => {
@@ -138,11 +154,6 @@ export const postUpvoteQuestion = (questionId) => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = () => {
-    fetchQuestions();
-    fetchAnswers();
-  };
 };
 
 export const postUserAnswer = () => {
@@ -156,9 +167,8 @@ export const postUserAnswer = () => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = fetchAnswers;
 };
+
 export const postUpvoteAnswer = (answerId) => {
   const message = {
     type: "postUpvote",
@@ -169,6 +179,4 @@ export const postUpvoteAnswer = (answerId) => {
   };
 
   sendSocketMessage(message);
-
-  socket.onmessage = fetchAnswers;
 };
