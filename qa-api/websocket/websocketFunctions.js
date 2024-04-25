@@ -6,7 +6,7 @@ import {
   getCourses,
   postUpvoteQuestion,
   postUserAnswer,
-} from "./endpoints.js";
+} from "../functionality/endpoints.js";
 
 export const messageHandlers = {
   getllm: async (data) => {

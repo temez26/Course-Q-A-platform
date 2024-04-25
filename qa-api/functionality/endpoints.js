@@ -15,7 +15,7 @@ import {
   getAllQuestions,
   getllmAnswersForQuestion,
   getHumanAnswersForQuestion,
-} from "./databaseQueries.js";
+} from "../database/databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
 export async function getllm(request) {
   const data = request;
