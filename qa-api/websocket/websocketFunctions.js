@@ -9,6 +9,10 @@ import {
 } from "../functionality/endpoints.js";
 
 export const messageHandlers = {
+  test: async (data) => {
+    console.log("Received test message with data:", data);
+    return "Test message received!";
+  },
   getllm: async (data) => {
     await getllm(data);
     return getQuestionsAndAnswers(data);
