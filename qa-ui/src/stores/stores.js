@@ -31,17 +31,18 @@ export let answerpage = createSyncedStore("answerpage", 0);
 
 //user answer input
 export let userAnswer = createSyncedStore("userAnswer", "");
+
 //user question input
 export let question = createSyncedStore("question", "");
 
 //for the course page
 export let questionsAndAnswers = createSyncedStore("questionsAndAnswers", []);
+
 // for the questionanswers page
 export let updatedAnswers = createSyncedStore("updatedAnswers", []);
 
 // saves the specific course that is selected from courses page
 export let course = writable(null);
-// clicked id on the course question send it trough api call to get the correct question
 
 // clicked id on the course question send it trough api call to get the correct answer
 export let answerId = writable(0);
