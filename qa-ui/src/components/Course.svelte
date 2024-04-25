@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import Pagination from "./shared/Pagination.svelte";
   import QuestionList from "./shared/QuestionList.svelte";
   import Button from "./shared/Button.svelte";
@@ -55,8 +55,9 @@
 </div>
 
 <div class="bg-gray-800 bg-opacity-75 text-white p-6 mt-2 rounded">
-  <QuestionInput />
-
+  <div class="flex flex-col w-full sm:w-2/3 mx-auto">
+    <QuestionInput />
+  </div>
   <Pagination {nextPage} {prevPage} page={$page} />
 
   {#each $questionsAndAnswers as qna, i (i)}
