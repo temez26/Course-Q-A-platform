@@ -24,12 +24,11 @@ const stores = {
   answerId,
   answerpage,
 };
-console.log(stores);
 const socket = new WebSocket("ws://localhost:7800/ws/");
 
 const logSocketEvent = (event, message) =>
-  console.log(`WebSocket ${event}: ${message}`);
-socket.onopen = () => logSocketEvent("is connected", socket);
+  //console.log(`WebSocket ${event}: ${message}`);
+  (socket.onopen = () => logSocketEvent("is connected", socket));
 socket.onerror = (error) => logSocketEvent("error", error);
 socket.onclose = (event) => logSocketEvent("is closed with event", event);
 
@@ -85,7 +84,7 @@ const getData = (...keys) => {
   keys.forEach((key) => {
     data[key] = get(stores[key]);
   });
-  console.log(data);
+
   return data;
 };
 export const fetchCourses = () => send("getCourses");
