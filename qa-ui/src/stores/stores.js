@@ -20,7 +20,7 @@ if (!user) {
 // id for the user
 export const userUuid = writable(user);
 // is used to retrive the questions and answers based on the course id
-export let courseId = createSyncedStore("courseId", 0);
+export const courseId = createSyncedStore("courseId", 0);
 // stores the specific question id that is clicked on the course question list
 export const questionId = createSyncedStore("questionId", 0);
 // stores the number of the answers list page number

@@ -63,7 +63,7 @@ export const handleWebSocket = async (ws) => {
           break;
         case "getCourse":
           console.log("Handling getCourse");
-          result = await getCourse(messageObj.courseId);
+          result = await getCourse(messageObj.data.courseId);
           break;
         default:
           console.log("Invalid message type:", messageObj.type);
