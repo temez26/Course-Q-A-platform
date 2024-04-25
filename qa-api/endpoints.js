@@ -1,4 +1,4 @@
-import { createResponse, withErrorHandling, processAnswers } from "./helper.js";
+import { createResponse, withErrorHandling } from "./helper.js";
 import {
   insertQuestion,
   insertAnswer,
