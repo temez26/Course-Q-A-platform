@@ -1,17 +1,12 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import Button from "./shared/Button.svelte";
   import AnswerList from "./shared/AnswerList.svelte";
   import Pagination from "./shared/Pagination.svelte";
   import AnswerInput from "./shared/AnswerInput.svelte";
   import LlmList from "./shared/LlmList.svelte";
 
-  import {
-    page,
-    question,
-    updatedAnswers,
-    answerpage,
-  } from "../stores/stores.js";
+  import { question, updatedAnswers, answerpage } from "../stores/stores.js";
   import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
@@ -25,7 +20,7 @@
       fetchAnswers();
     }
   };
-
+  let intervalId;
   onMount(async () => {
     if (window.location.href.includes("question")) {
       question.set("");
@@ -33,13 +28,12 @@
 
     fetchAnswers();
 
-    setTimeout(async () => {
-      if ($updatedAnswers) {
-        // Check if $updatedAnswers is defined
-        const qna = $updatedAnswers;
-        if (qna.length === 0 || qna[0].answers.length === 0) {
-          fetchAnswers();
-        }
+    intervalId = setInterval(async () => {
+      const count = $updatedAnswers[0].llmAnswers.length;
+      if (count < 3) {
+        fetchAnswers();
+      } else {
+        clearInterval(intervalId);
       }
     }, 2200);
   });
@@ -57,9 +51,9 @@
     <AnswerInput {qna} />
     <div class="bg-gray-800 p-4 rounded">
       <h3 class="font-bold text-xl mb-2 text-gray-100">LLM Answers:</h3>
-      {#if Array.isArray(qna.llmAnswers) && qna.llmAnswers.length === 0}
+      {#if !Array.isArray(qna.llmAnswers) || qna.llmAnswers.length === 0}
         <p>Loading...</p>
-      {:else if Array.isArray(qna.llmAnswers)}
+      {:else}
         <div class="overflow-y-auto max-h-96">
           <LlmList answers={qna.llmAnswers} {postUpvoteAnswer} />
         </div>
