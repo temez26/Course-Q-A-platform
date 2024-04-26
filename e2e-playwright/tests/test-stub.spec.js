@@ -88,3 +88,43 @@ test("Adding question to a course", async ({ page }) => {
     await page.waitForTimeout(10);
   }
 });
+
+test("Checking that the question page opens", async ({ page }) => {
+  // Define the expected question text
+  const questionText = "What is the prerequisite for Computer Science?";
+
+  // Navigate to the courses page
+  await page.goto("http://localhost:7800/", { waitUntil: "networkidle" });
+
+  // Check if the courses page loaded correctly
+  await checkTextContent(page, "h1", "Welcome to Our Courses");
+
+  // Click on the "Courses" button to view the courses
+  await clickButton(page, "Courses");
+
+  // Click on the course
+  await page.click(`:nth-match(button:has-text("View Course"), 1)`);
+
+  // Check if the course page loaded correctly
+  await checkTextContent(page, "h1.text-5xl", "Welcome to the course page");
+
+  // Click on the first question to open the question page
+  await page.click(`a.font-bold.text-2xl:nth-child(1)`);
+
+  // Check if the question page loaded correctly
+  await checkTextContent(
+    page,
+    "span.text-white.overflow-auto.break-words",
+    questionText
+  );
+
+  // Check that the correct question name is displayed on the question page
+  const questionName = await page.textContent(
+    "span.text-white.overflow-auto.break-words"
+  );
+  expect(questionName).toBe(questionText);
+
+  // Go back to the courses page
+  await clickButton(page, "Back to the Course");
+  await page.waitForTimeout(10);
+});
