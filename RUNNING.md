@@ -1,3 +1,9 @@
-TODO: The RUNNING.md outlines steps needed to run the application separately for the development mode and the production mode.
+# How to run
 
-TODO: For merits, the RUNNING.md also outlines the steps needed to use Kubernetes to run the application with Minikube (or somilar), using kubernetes configuration files created as parts of the passing with merits requirements
+## First time
+- run command `docker compose up --build` on the root directory
+## Other times
+- Just run `docker compose up` on the root directory 
+
+## Run tests
+- For playwright navigate to the folder `e2e-playwright and run command docker compose run --entrypoint=npx e2e-playwright playwright test`
