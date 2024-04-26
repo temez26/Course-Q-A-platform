@@ -1,4 +1,6 @@
 import { createResponse, withErrorHandling } from "./helper.js";
+import { PQueue } from "../deps.js";
+
 import {
   insertQuestion,
   insertAnswer,
@@ -17,6 +19,9 @@ import {
   getHumanAnswersForQuestion,
 } from "../database/databaseQueries.js";
 // HANDLING THE QUESTION INSERTION AND ALSO THE CALL TO THE LLM API
+
+const queue = new PQueue({ concurrency: 1 });
+
 export async function getllm(request) {
   const data = request;
   const [{ id: questionId }] = await insertQuestion(
@@ -24,13 +29,17 @@ export async function getllm(request) {
     data.userUuid,
     data.courseId
   );
-  queueMicrotask(() => handleLLMApi(data, questionId));
+
+  // Add the task to the queue
+  queue.add(() => handleLLMApi(data, questionId));
+
   return createResponse({
     questionId,
     data,
     message: "Question inserted successfully",
   });
 }
+
 async function handleLLMApi(data, questionId) {
   const fetchPromises = Array(3)
     .fill()
