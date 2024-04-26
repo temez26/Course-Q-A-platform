@@ -28,7 +28,6 @@ test("WebSocket connection", async ({ page }) => {
   const coursesText = await page.textContent(".text-5xl");
   expect(coursesText).toBe("Select any course you want");
 
-  // Check for the course names
   const courseNames = [
     "Computer Science",
     "Software Engineering",
@@ -39,8 +38,26 @@ test("WebSocket connection", async ({ page }) => {
     "Cloud Computing",
     "Web Development",
   ];
-  for (const name of courseNames) {
-    const courseElement = await page.waitForSelector(`text=${name}`);
-    expect(courseElement).toBeTruthy();
+
+  for (let i = 0; i < courseNames.length; i++) {
+    console.log(`Checking course: ${courseNames[i]}`);
+
+    // Click the "View Course" button for the specific course
+    await page.click(`:nth-match(button:has-text("View Course"), ${i + 1})`);
+
+    const courseTitleName = await page.textContent("h1.text-5xl");
+    console.log(`Course title: ${courseTitleName}`);
+    expect(courseTitleName).toBe("Welcome to the course page");
+
+    // Fetch the course name from the course page
+    const coursePageName = await page.textContent("h2.text-2xl");
+    console.log(`Course page name: ${coursePageName}`);
+    expect(coursePageName).toBe(courseNames[i]);
+
+    // Navigate back to the course list page
+    await page.click(`button:has-text("Back to Courses")`);
+
+    // Add a delay to ensure the page has fully reloaded before the next iteration starts
+    await page.waitForTimeout(10);
   }
 });
