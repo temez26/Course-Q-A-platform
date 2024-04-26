@@ -1,63 +1,97 @@
 const { test, expect } = require("@playwright/test");
 
-test("WebSocket connection", async ({ page }) => {
-  // Navigate to your page that uses the WebSocket connection
-  await page.goto("http://localhost:7800/", {
-    waitUntil: "networkidle",
-  });
+const courseNames = [
+  "Computer Science",
+  "Software Engineering",
+  "Data Science",
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Network Security",
+  "Cloud Computing",
+  "Web Development",
+];
 
-  // Listen for console log events
-  page.on("console", (msg) => {
-    if (msg.type() === "log") {
-      console.log(`Browser console log: ${msg.text()}`);
-    }
-  });
+const courseQuestions = [
+  "What is the prerequisite for Computer Science?",
+  "What is the prerequisite for Software Engineering?",
+  "What is the prerequisite for Data Science?",
+  "What is the prerequisite for Artificial Intelligence?",
+  "What is the prerequisite for Machine Learning?",
+  "What is the prerequisite for Network Security?",
+  "What is the prerequisite for Cloud Computing?",
+  "What is the prerequisite for Web Development?",
+];
 
-  // Check that the page has the text "Welcome to Our Courses"
-  const welcomeText = await page.textContent("h1");
-  expect(welcomeText).toBe("Welcome to Our Courses");
+const checkTextContent = async (page, selector, expectedText) => {
+  const actualText = await page.textContent(selector);
+  expect(actualText).toBe(expectedText);
+};
 
-  // Check that the "Courses" button exists
-  const button = await page.waitForSelector('button:has-text("Courses")');
-  expect(button).toBeTruthy();
+const clickButton = async (page, buttonText) => {
+  await page.click(`button:has-text("${buttonText}")`);
+};
 
-  // Click the "Courses" button
-  await page.click('button:has-text("Courses")');
+test("WebSocket connection and check all the courses exist", async ({
+  page,
+}) => {
+  await page.goto("http://localhost:7800/", { waitUntil: "networkidle" });
 
-  // Check that the page has the text "Select any course you want"
-  const coursesText = await page.textContent(".text-5xl");
-  expect(coursesText).toBe("Select any course you want");
+  page.on(
+    "console",
+    (msg) =>
+      msg.type() === "log" && console.log(`Browser console log: ${msg.text()}`)
+  );
 
-  const courseNames = [
-    "Computer Science",
-    "Software Engineering",
-    "Data Science",
-    "Artificial Intelligence",
-    "Machine Learning",
-    "Network Security",
-    "Cloud Computing",
-    "Web Development",
-  ];
+  await checkTextContent(page, "h1", "Welcome to Our Courses");
+  await clickButton(page, "Courses");
+  await checkTextContent(page, ".text-5xl", "Select any course you want");
 
   for (let i = 0; i < courseNames.length; i++) {
     console.log(`Checking course: ${courseNames[i]}`);
+    await page.click(`:nth-match(button:has-text("View Course"), ${i + 1})`);
+    await checkTextContent(page, "h1.text-5xl", "Welcome to the course page");
+    await checkTextContent(page, "h2.text-2xl", courseNames[i]);
+    await clickButton(page, "Back to Courses");
+    await page.waitForTimeout(10);
+  }
+});
 
-    // Click the "View Course" button for the specific course
+test("Adding question to a course", async ({ page }) => {
+  // Navigate to the courses page
+  await page.goto("http://localhost:7800/", { waitUntil: "networkidle" });
+
+  // Check if the courses page loaded correctly
+  await checkTextContent(page, "h1", "Welcome to Our Courses");
+
+  // Click on the "Courses" button to view the courses
+  await clickButton(page, "Courses");
+
+  for (let i = 0; i < courseNames.length; i++) {
+    // Click on the course
     await page.click(`:nth-match(button:has-text("View Course"), ${i + 1})`);
 
-    const courseTitleName = await page.textContent("h1.text-5xl");
-    console.log(`Course title: ${courseTitleName}`);
-    expect(courseTitleName).toBe("Welcome to the course page");
+    // Check if the course page loaded correctly
+    await checkTextContent(page, "h1.text-5xl", "Welcome to the course page");
 
-    // Fetch the course name from the course page
-    const coursePageName = await page.textContent("h2.text-2xl");
-    console.log(`Course page name: ${coursePageName}`);
-    expect(coursePageName).toBe(courseNames[i]);
+    // Type the question into the input field
+    const questionText = courseQuestions[i];
+    await page.fill(
+      'input[placeholder="Enter your question here"]',
+      questionText
+    );
 
-    // Navigate back to the course list page
-    await page.click(`button:has-text("Back to Courses")`);
+    // Click the "Ask!" button to submit the question
+    await clickButton(page, "Ask!");
 
-    // Add a delay to ensure the page has fully reloaded before the next iteration starts
+    // Wait for the question to be posted and the page to update
+    await page.waitForTimeout(20);
+
+    // Check if the question appears in the question list
+    const questionInList = await page.textContent(`text=${questionText}`);
+    expect(questionInList).toBe(questionText);
+
+    // Go back to the courses page
+    await clickButton(page, "Back to Courses");
     await page.waitForTimeout(10);
   }
 });
