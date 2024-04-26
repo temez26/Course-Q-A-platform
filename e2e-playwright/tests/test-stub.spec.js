@@ -36,18 +36,11 @@ test("WebSocket connection and check all the courses exist", async ({
 }) => {
   await page.goto("http://localhost:7800/", { waitUntil: "networkidle" });
 
-  page.on(
-    "console",
-    (msg) =>
-      msg.type() === "log" && console.log(`Browser console log: ${msg.text()}`)
-  );
-
   await checkTextContent(page, "h1", "Welcome to Our Courses");
   await clickButton(page, "Courses");
   await checkTextContent(page, ".text-5xl", "Select any course you want");
 
   for (let i = 0; i < courseNames.length; i++) {
-    console.log(`Checking course: ${courseNames[i]}`);
     await page.click(`:nth-match(button:has-text("View Course"), ${i + 1})`);
     await checkTextContent(page, "h1.text-5xl", "Welcome to the course page");
     await checkTextContent(page, "h2.text-2xl", courseNames[i]);
