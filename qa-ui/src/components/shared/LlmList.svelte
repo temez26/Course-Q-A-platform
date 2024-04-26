@@ -2,7 +2,7 @@
   import Button from "./Button.svelte";
   export let answers = [];
   import { answerId } from "../../stores/stores.js";
-  import { postUpvoteAnswer, fetchAnswers } from "../../api/apicalls.js";
+  import { postUpvoteAnswer } from "../../api/apicalls.js";
   console.log(answers);
 </script>
 
