@@ -2,7 +2,7 @@ import ws from "k6/ws";
 import { check } from "k6";
 
 export let options = {
-  vus: 100,
+  vus: 50,
   duration: "10s",
   summaryTrendStats: ["avg", "p(99)"],
 };

@@ -1,6 +1,5 @@
-FROM node:lts-alpine3.17
 
-EXPOSE 3000
+FROM node:lts-alpine3.17 as build
 
 WORKDIR /app
 
@@ -12,4 +11,15 @@ RUN npm install
 
 COPY . .
 
-CMD [ "astro", "dev" ]
+RUN astro build
+
+
+FROM nginx:latest as server
+
+
+COPY nginx.prod.conf /etc/nginx/nginx.conf
+
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+CMD ["nginx", "-g", "daemon off;"]
