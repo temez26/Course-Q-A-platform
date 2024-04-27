@@ -17,8 +17,10 @@
     <Button
       text="Ask!"
       action={async () => {
-        askSomething();
-        question.set("");
+        if ($question.trim() !== "") {
+          await askSomething();
+          question.set("");
+        }
       }}
       className="border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
     />
