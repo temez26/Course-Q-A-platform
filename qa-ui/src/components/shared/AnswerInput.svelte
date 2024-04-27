@@ -27,9 +27,11 @@
     <Button
       text="Submit"
       action={() => {
-        questionId.set(qna.id);
-        postUserAnswer();
-        $userAnswer = "";
+        if ($userAnswer.trim() !== "") {
+          questionId.set(qna.id);
+          postUserAnswer();
+          $userAnswer = "";
+        }
       }}
       className="bg-blue-700 hover:bg-blue-900"
     />
