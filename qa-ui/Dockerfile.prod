@@ -12,4 +12,6 @@ RUN npm install
 
 COPY . .
 
-CMD [ "astro", "dev" ]
+RUN npm run build
+
+CMD [ "npm", "start" ]
