@@ -78,7 +78,7 @@ services:
     env_file:
       - project.env
     profiles:
-      - migrate
+      - prod
 
   e2e-playwright:
     entrypoint: "/bin/true"
