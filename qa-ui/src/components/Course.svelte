@@ -14,6 +14,9 @@
   import { fetchQuestions, fetchCourse } from "../api/apicalls.js";
 
   const nextPage = () => {
+    if ($questionsAndAnswers.length < 20) {
+      return;
+    }
     $page += 1;
     fetchQuestions();
   };

@@ -10,6 +10,9 @@
   import { fetchAnswers, postUpvoteAnswer } from "../api/apicalls.js";
 
   const nextPage = () => {
+    if ($updatedAnswers[0].humanAnswers.length < 20) {
+      return;
+    }
     $answerpage += 1;
     fetchAnswers();
   };

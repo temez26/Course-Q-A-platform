@@ -27,7 +27,8 @@
     <Button
       text="Submit"
       action={() => {
-        if ($userAnswer.trim() !== "") {
+        if ($userAnswer !== "") {
+          userAnswer.set($userAnswer);
           questionId.set(qna.id);
           postUserAnswer();
           $userAnswer = "";

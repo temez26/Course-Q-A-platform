@@ -36,10 +36,10 @@ export let userAnswer = createSyncedStore("userAnswer", "");
 export let question = createSyncedStore("question", "");
 
 //for the course page
-export let questionsAndAnswers = createSyncedStore("questionsAndAnswers", []);
+export let questionsAndAnswers = writable([]);
 
 // for the questionanswers page
-export let updatedAnswers = createSyncedStore("updatedAnswers", []);
+export let updatedAnswers = writable([]);
 
 // saves the specific course that is selected from courses page
 export let course = writable(null);

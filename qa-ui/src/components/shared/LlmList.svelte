@@ -3,7 +3,6 @@
   export let answers = [];
   import { answerId } from "../../stores/stores.js";
   import { postUpvoteAnswer } from "../../api/apicalls.js";
-  console.log(answers);
 </script>
 
 <ul>

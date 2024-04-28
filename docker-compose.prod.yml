@@ -15,7 +15,8 @@ services:
     build:
       context: qa-api
       dockerfile: Dockerfile.prod
-    image: qa-api
+    image: qa-api-prod
+    restart: "on-failure"
     expose:
       - 7777
     depends_on:
@@ -24,6 +25,7 @@ services:
     env_file:
       - project.env
     deploy:
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: "5s"
@@ -34,9 +36,9 @@ services:
     build:
       context: qa-ui
       dockerfile: Dockerfile.prod
-    image: qa-ui
+    image: qa-ui-prod
     expose:
-      - 3000
+      - 3000:80
     depends_on:
       - qa-api
     deploy:
@@ -49,7 +51,7 @@ services:
   llm-api:
     build:
       context: ./llm-api
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     image: llm-api
     expose:
       - 7000
@@ -76,22 +78,13 @@ services:
     env_file:
       - project.env
     profiles:
-      - migrate
-
-  pgadmin:
-    image: dpage/pgadmin4:6.20
-    env_file:
-      - project.env
-    depends_on:
-      - database
-    profiles:
-      - pgadmin
+      - prod
 
   e2e-playwright:
     entrypoint: "/bin/true"
     build:
       context: ./e2e-playwright
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     image: e2e-playwright
     network_mode: host
     depends_on:
