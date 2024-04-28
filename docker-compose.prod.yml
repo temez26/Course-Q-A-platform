@@ -15,7 +15,8 @@ services:
     build:
       context: qa-api
       dockerfile: Dockerfile.prod
-    image: qa-api
+    image: qa-api-prod
+    restart: "on-failure"
     expose:
       - 7777
     depends_on:
@@ -24,6 +25,7 @@ services:
     env_file:
       - project.env
     deploy:
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: "5s"
