@@ -97,8 +97,8 @@ default ✓ [ 100% ] 50 VUs  10s
 
 # Playwright tests
 
-  ✓  1 [e2e-headless-chromium] › tests/test-stub.spec.js:24:1 › 1 WebSocket connection and check all the courses exist (3.3s)
-  ✓  2 [e2e-headless-chromium] › tests/test-stub.spec.js:42:1 › 2 Adding question to a course (3.6s)
+-  ✓  1 [e2e-headless-chromium] › tests/test-stub.spec.js:24:1 › 1 WebSocket connection and check all the courses exist (3.3s)
+-  ✓  2 [e2e-headless-chromium] › tests/test-stub.spec.js:42:1 › 2 Adding question to a course (3.6s)
 Course 1: Computer Science, Question: v8dpzv0skhlts9l23z4di
 Course 2: Software Engineering, Question: boerjje729u0vbgjfo6j1ni
 Course 3: Data Science, Question: cch03lo45f9hrgnrakyqb
@@ -107,7 +107,7 @@ Course 5: Machine Learning, Question: d9yth5x4s2tv7gvkgihfb
 Course 6: Network Security, Question: rvfm093mkvyixx0wbwum
 Course 7: Cloud Computing, Question: bnm0u1g977ei3xze974cfl
 Course 8: Web Development, Question: ngjdrz6tewi20g54qbb5hij
-  ✓  3 [e2e-headless-chromium] › tests/test-stub.spec.js:73:1 › 3 Checking that the question page opens (5.4s)
+ - ✓  3 [e2e-headless-chromium] › tests/test-stub.spec.js:73:1 › 3 Checking that the question page opens (5.4s)
 Course 1: Computer Science, Question: v8dpzv0skhlts9l23z4di
 Course 2: Software Engineering, Question: boerjje729u0vbgjfo6j1ni
 Course 3: Data Science, Question: cch03lo45f9hrgnrakyqb
@@ -116,11 +116,11 @@ Course 5: Machine Learning, Question: d9yth5x4s2tv7gvkgihfb
 Course 6: Network Security, Question: rvfm093mkvyixx0wbwum
 Course 7: Cloud Computing, Question: bnm0u1g977ei3xze974cfl
 Course 8: Web Development, Question: ngjdrz6tewi20g54qbb5hij
-  ✓  4 [e2e-headless-chromium] › tests/test-stub.spec.js:101:1 › 4 Checking the upvoting of the questions (1.9s)
-  ✓  5 [e2e-headless-chromium] › tests/test-stub.spec.js:125:1 › 5 Checking the upvoting of the answers (2.2s)
-  ✓  6 [e2e-headless-chromium] › tests/test-stub.spec.js:156:1 › 6 Checking if the llmanswers list has content (1.1s)
-  ✓  7 [e2e-headless-chromium] › tests/test-stub.spec.js:169:1 › 7 Checking if the answer inputted goes to the answer list (2.1s)
+ - ✓  4 [e2e-headless-chromium] › tests/test-stub.spec.js:101:1 › 4 Checking the upvoting of the questions (1.9s)
+ - ✓  5 [e2e-headless-chromium] › tests/test-stub.spec.js:125:1 › 5 Checking the upvoting of the answers (2.2s)
+ - ✓  6 [e2e-headless-chromium] › tests/test-stub.spec.js:156:1 › 6 Checking if the llmanswers list has content (1.1s)
+ - ✓  7 [e2e-headless-chromium] › tests/test-stub.spec.js:169:1 › 7 Checking if the answer inputted goes to the answer list (2.1s)
 
-  Slow test file: [e2e-headless-chromium] › tests/test-stub.spec.js (19.6s)
-  Consider splitting slow test files to speed up parallel execution
+ - Slow test file: [e2e-headless-chromium] › tests/test-stub.spec.js (19.6s)
+ - Consider splitting slow test files to speed up parallel execution
   7 passed (20.3s)
