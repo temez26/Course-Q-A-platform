@@ -17,7 +17,7 @@
     <Button
       text="Ask!"
       action={async () => {
-        if ($question.trim() !== "") {
+        if ($question !== "") {
           await askSomething();
           question.set("");
         }

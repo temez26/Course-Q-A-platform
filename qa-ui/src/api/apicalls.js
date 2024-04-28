@@ -7,11 +7,10 @@ const setResponse = (type, message) => {
     getCourses: () => stores.courses.set(message),
     getCourse: () => stores.course.set(message[0]),
     getllm: () => stores.questionsAndAnswers.set(message),
-    getQuestionsAndAnswers: () =>
-      (message.length === 1
-        ? stores.updatedAnswers
-        : stores.questionsAndAnswers
-      ).set(message),
+    getQuestionsAndAnswers: () => {
+      stores.updatedAnswers.set(message);
+      stores.questionsAndAnswers.set(message);
+    },
     postUpvoteQuestion: () => stores.questionsAndAnswers.set(message),
     postUserAnswer: () => stores.updatedAnswers.set(message),
     postUpvote: () => stores.updatedAnswers.set(message),

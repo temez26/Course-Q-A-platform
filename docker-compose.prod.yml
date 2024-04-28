@@ -34,9 +34,9 @@ services:
     build:
       context: qa-ui
       dockerfile: Dockerfile.prod
-    image: qa-ui
+    image: qa-ui-prod
     expose:
-      - 3000
+      - 3000:80
     depends_on:
       - qa-api
     deploy:
@@ -49,7 +49,7 @@ services:
   llm-api:
     build:
       context: ./llm-api
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     image: llm-api
     expose:
       - 7000
@@ -78,20 +78,11 @@ services:
     profiles:
       - migrate
 
-  pgadmin:
-    image: dpage/pgadmin4:6.20
-    env_file:
-      - project.env
-    depends_on:
-      - database
-    profiles:
-      - pgadmin
-
   e2e-playwright:
     entrypoint: "/bin/true"
     build:
       context: ./e2e-playwright
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     image: e2e-playwright
     network_mode: host
     depends_on:
