@@ -49,7 +49,7 @@ services:
       - 7000
 
   database:
-    container_name: database-server-dab-p2-bf006f69-136b-4835-8bca-f55abd81c2fa
+    container_name: database-server-dab-boi
     image: postgres:14.1
     restart: "no"
     env_file:
