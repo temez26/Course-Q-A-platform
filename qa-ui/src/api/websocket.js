@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://localhost:7800/ws/");
+const socket = new WebSocket(`ws://${window.location.hostname}:7800/ws/`);
 
 const logSocketEvent = (event, message) =>
   //console.log(`WebSocket ${event}: ${message}`);
