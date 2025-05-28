@@ -106,8 +106,3 @@ Key configuration files:
 - [Running Instructions](RUNNING.md)
 - [Project Reflection](REFLECTION.md)
 - [Performance Results](PERFORMANCE_TEST_RESULTS.md)
-
-## ✨ Acknowledgments
-
-- Built with Astro and Svelte for optimal performance
-- Designed for scalability with Docker containerization
