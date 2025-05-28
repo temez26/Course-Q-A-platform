@@ -56,7 +56,7 @@ open http://localhost:7800
 
 ```bash
 # Start production build
-docker compose --profile prod up
+docker compose -f docker-compose.prod.yml up
 ```
 
 ## 🧪 Testing
@@ -72,6 +72,7 @@ docker compose run --entrypoint=npx e2e-playwright playwright test
 
 ```bash
 cd k6
+# windows
 docker run -i --network="host" -v "%cd%:/k6" grafana/k6:master-with-browser run /k6/test.js
 ```
 
